@@ -2,6 +2,7 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.Scanner;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,12 +19,15 @@ public class TwoSAT {
 	public static TwoSAT fromFile(String fileName) throws IOException {
 		File f = new File(fileName);
 		BufferedReader b = new BufferedReader(new FileReader(f));
+		Scanner s = new Scanner(b);
 		
 		Map<Integer, Literal> literals = new HashMap<Integer, Literal>();
 		Vector<Clause> clauses = new Vector<Clause>();
 		
-		int nb_literals = Integer.parseInt(b.readLine()); // exception
+		//if (!s.hasNextInt()) exception
 		
+		int nb_literals = s.nextInt();
+				
 		char next_char = 'a';
 		
 		for (int i = 1; i <= nb_literals; ++i) {
@@ -33,18 +37,24 @@ public class TwoSAT {
 			++next_char;
 		}
 		
-		String line = "";
-		while ((line = b.readLine()) != null) {
-			int space_index = line.indexOf(" ");
-			// TODO si = -1
-			String left_str = line.substring(space_index), right_str = line.substring(space_index, line.length());
-			int left_int = Integer.parseInt(left_str), right_int = Integer.parseInt(right_str);
-			// TODO exception
-			
-			Literal left_lit = literals.get(left_int), right_lit = literals.get(right_int);
+//		String line = "";
+//		while ((line = b.readLine()) != null) {
+//			int space_index = line.indexOf(" ");
+//			// TODO si = -1
+//			String left_str = line.substring(space_index), right_str = line.substring(space_index, line.length());
+//			int left_int = Integer.parseInt(left_str), right_int = Integer.parseInt(right_str);
+//			// TODO exception
+//			
+//			Literal left_lit = literals.get(left_int), right_lit = literals.get(right_int);
+//			clauses.add(new Clause(left_lit, right_lit));
+//		}
+		
+		while (s.hasNext()) {
+			Literal left_lit = literals.get(s.nextInt()), right_lit = literals.get(s.nextInt());
 			clauses.add(new Clause(left_lit, right_lit));
 		}
-		b.close();
+		
+		s.close();
 		
 		return new TwoSAT(clauses.toArray(new Clause[clauses.size()]));
 	}
