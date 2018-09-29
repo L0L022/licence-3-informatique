@@ -1,21 +1,22 @@
 
 public class Clause {
-	Literal left, right;
+	private Literal left, right;
 	
-	Clause(Literal left, Literal right) {
+	public Clause(Literal left, Literal right) {
 		this.left = left;
 		this.right = right;
 	}
 	
-	Literal left() {
+	public Literal left() {
 		return left;
 	}
 	
-	Literal right() {
+	public Literal right() {
 		return right;
 	}
 	
-	String asString() {
-		return left.asString() + " ∨ " + right.asString();
+	@Override
+	public String toString() {
+		return left.toString() + " ∨ " + right.toString();
 	}
 }

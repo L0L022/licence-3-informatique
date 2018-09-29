@@ -9,15 +9,13 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class TwoSAT {
-	Clause[] clauses;
-	int nb_literals;
+	private Clause[] clauses;
 	
-	TwoSAT(Clause[] clauses, int nb_literals) {
+	public TwoSAT(Clause[] clauses) {
 		this.clauses = clauses;
-		this.nb_literals = nb_literals;
 	}
 	
-	static TwoSAT fromFile(String fileName) throws IOException {
+	public static TwoSAT fromFile(String fileName) throws IOException {
 		File f = new File(fileName);
 		BufferedReader b = new BufferedReader(new FileReader(f));
 		
@@ -25,6 +23,15 @@ public class TwoSAT {
 		Vector<Clause> clauses = new Vector<Clause>();
 		
 		int nb_literals = Integer.parseInt(b.readLine()); // exception
+		
+		char next_char = 'a';
+		
+		for (int i = 1; i <= nb_literals; ++i) {
+			Literal literal = new Literal("" + next_char);
+			literals.put(i, literal);
+			literals.put(-i, literal.not());
+			++next_char;
+		}
 		
 		String line = "";
 		while ((line = b.readLine()) != null) {
@@ -34,35 +41,30 @@ public class TwoSAT {
 			int left_int = Integer.parseInt(left_str), right_int = Integer.parseInt(right_str);
 			// TODO exception
 			
-			if (!literals.containsKey(left_int)) {
-				literals.put(left_int, new Literal(left_int));
-			}
-			if (!literals.containsKey(right_int)) {
-				literals.put(right_int, new Literal(right_int));
-			}
-			
 			Literal left_lit = literals.get(left_int), right_lit = literals.get(right_int);
 			clauses.add(new Clause(left_lit, right_lit));
 		}
 		b.close();
 		
-		return new TwoSAT(clauses.toArray(new Clause[clauses.size()]), nb_literals);
+		return new TwoSAT(clauses.toArray(new Clause[clauses.size()]));
 	}
 	
-	String asString() {
-		StringBuilder sb = new StringBuilder("{");
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("{ ");
 		int count = 0;
 		for (Clause clause : clauses) {
 			if (count > 0) {
 				sb.append(", ");
 			}
-			sb.append(clause.asString());
+			sb.append(clause.toString());
+			++count;
 		}
-		sb.append("}");
+		sb.append(" }");
 		return sb.toString();
 	}
 	
-	Boolean is_satisfiable() {
+	public boolean is_satisfiable() {
 		// TODO
 		return false;
 	}

@@ -17,8 +17,13 @@ public class TwoSATTest {
 	}
 
 	@Test
-	public void testAsString() {
-		fail("Not yet implemented");
+	public void testToString() {
+		Literal[] lit = {new Literal("x"), new Literal("y"), new Literal("z")};
+		Clause[] clauses = {new Clause(lit[0], lit[1].not()), new Clause(lit[0].not(), lit[2]), new Clause(lit[0], lit[2]), new Clause(lit[1].not(), lit[2].not())};
+		
+		TwoSAT twoSAT = new TwoSAT(clauses);
+		
+		assertThat(twoSAT.toString(), equalTo("{ x ∨ ¬y, ¬x ∨ z, x ∨ z, ¬y ∨ ¬z }"));
 	}
 
 	@Test
