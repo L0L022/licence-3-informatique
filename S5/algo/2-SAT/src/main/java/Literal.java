@@ -18,6 +18,18 @@ public class Literal {
 		return new Literal(label, !is_negative);
 	}
 	
+	public Literal abs() {
+		if (is_negative) {
+			return not();
+		} else {
+			return this;
+		}
+	}
+	
+	public boolean isNegative() {
+		return is_negative;
+	}
+	
 	@Override
 	public String toString() {
 		if (is_negative) {

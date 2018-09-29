@@ -1,6 +1,9 @@
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+import java.util.List;
+import java.util.Vector;
+
 import org.junit.Test;
 
 public class DirectedGraphTest {
@@ -217,7 +220,18 @@ public class DirectedGraphTest {
 	}
 
 	@Test
-	public void testTranspose() {
+	public void testTranspose_one_vertex() {
+		DirectedGraph<Integer> graph = new DirectedGraph<Integer>();
+		graph.addVertex(0);
+		
+		DirectedGraph<Integer> t_graph = graph.transpose();
+		
+		assertThat(t_graph.order(), equalTo(1));
+		assertThat(t_graph.size(), equalTo(0));
+	}
+	
+	@Test
+	public void testTranspose_simple() {
 		DirectedGraph<Integer> graph = new DirectedGraph<Integer>();
 		graph.addArrow(0, 1);
 		graph.addArrow(0, 2);
@@ -255,4 +269,92 @@ public class DirectedGraphTest {
 		assertThat(graph_str.indexOf("[2] -> [3]"), not(equalTo(-1)));
 	}
 
+	@Test
+	public void testStronglyConnectedComponents_one_vertex() {
+		DirectedGraph<Integer> graph = new DirectedGraph<Integer>();
+		graph.addVertex(0);
+		
+		List<DirectedGraph<Integer>> c = graph.stronglyConnectedComponents();
+		
+		assertThat(c.size(), equalTo(1));
+		assertThat(c.get(0).hasVertex(0), equalTo(true));
+	}
+	
+	@Test
+	public void testStronglyConnectedComponents_two_vertices() {
+		DirectedGraph<Integer> graph = new DirectedGraph<Integer>();
+		graph.addVertex(0);
+		graph.addVertex(1);
+		
+		List<DirectedGraph<Integer>> c = graph.stronglyConnectedComponents();
+		
+		assertThat(c.size(), equalTo(2));
+		assertThat(c.get(0).hasVertex(0) != c.get(1).hasVertex(0), equalTo(true));
+		assertThat(c.get(0).hasVertex(1) != c.get(1).hasVertex(1), equalTo(true));
+	}
+	
+	@Test
+	public void testStronglyConnectedComponents_one_component() {
+		DirectedGraph<Integer> graph = new DirectedGraph<Integer>();
+		graph.addArrow(0, 1);
+		graph.addArrow(1, 2);
+		graph.addArrow(2, 0);
+		
+		List<DirectedGraph<Integer>> c = graph.stronglyConnectedComponents();
+		
+		assertThat(c.size(), equalTo(1));
+		assertThat(c.get(0).hasVertex(0), equalTo(true));
+		assertThat(c.get(0).hasVertex(1), equalTo(true));
+		assertThat(c.get(0).hasVertex(2), equalTo(true));
+	}
+	
+	@Test
+	public void testStronglyConnectedComponents_two_components() {
+		DirectedGraph<Integer> graph = new DirectedGraph<Integer>();
+		graph.addArrow(0, 1);
+		graph.addArrow(1, 2);
+		graph.addArrow(2, 0);
+		
+		graph.addArrow(3, 4);
+		graph.addArrow(4, 5);
+		graph.addArrow(5, 3);
+		
+		List<DirectedGraph<Integer>> c = graph.stronglyConnectedComponents();
+		
+		assertThat(c.size(), equalTo(2));
+		
+		assertThat(c.get(0).hasVertex(0) != c.get(1).hasVertex(0), equalTo(true));
+		assertThat(c.get(0).hasVertex(1) != c.get(1).hasVertex(1), equalTo(true));
+		assertThat(c.get(0).hasVertex(2) != c.get(1).hasVertex(2), equalTo(true));
+		
+		assertThat(c.get(0).hasVertex(3) != c.get(1).hasVertex(3), equalTo(true));
+		assertThat(c.get(0).hasVertex(4) != c.get(1).hasVertex(4), equalTo(true));
+		assertThat(c.get(0).hasVertex(5) != c.get(1).hasVertex(5), equalTo(true));
+	}
+	
+	@Test
+	public void testStronglyConnectedComponents_two_connected_components() {
+		DirectedGraph<Integer> graph = new DirectedGraph<Integer>();
+		graph.addArrow(0, 1);
+		graph.addArrow(1, 2);
+		graph.addArrow(2, 0);
+		
+		graph.addArrow(2, 3);
+		
+		graph.addArrow(3, 4);
+		graph.addArrow(4, 5);
+		graph.addArrow(5, 3);
+		
+		List<DirectedGraph<Integer>> c = graph.stronglyConnectedComponents();
+		
+		assertThat(c.size(), equalTo(2));
+		
+		assertThat(c.get(0).hasVertex(0), equalTo(true));
+		assertThat(c.get(0).hasVertex(1), equalTo(true));
+		assertThat(c.get(0).hasVertex(2), equalTo(true));
+		
+		assertThat(c.get(1).hasVertex(3), equalTo(true));
+		assertThat(c.get(1).hasVertex(4), equalTo(true));
+		assertThat(c.get(1).hasVertex(5), equalTo(true));
+	}
 }

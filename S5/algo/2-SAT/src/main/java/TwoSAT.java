@@ -1,9 +1,12 @@
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.Scanner;
-
+import java.util.Set;
+import java.util.TreeSet;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -37,18 +40,6 @@ public class TwoSAT {
 			++next_char;
 		}
 		
-//		String line = "";
-//		while ((line = b.readLine()) != null) {
-//			int space_index = line.indexOf(" ");
-//			// TODO si = -1
-//			String left_str = line.substring(space_index), right_str = line.substring(space_index, line.length());
-//			int left_int = Integer.parseInt(left_str), right_int = Integer.parseInt(right_str);
-//			// TODO exception
-//			
-//			Literal left_lit = literals.get(left_int), right_lit = literals.get(right_int);
-//			clauses.add(new Clause(left_lit, right_lit));
-//		}
-		
 		while (s.hasNext()) {
 			Literal left_lit = literals.get(s.nextInt()), right_lit = literals.get(s.nextInt());
 			clauses.add(new Clause(left_lit, right_lit));
@@ -75,7 +66,22 @@ public class TwoSAT {
 	}
 	
 	public boolean is_satisfiable() {
-		// TODO
-		return false;
+		ImplicationGraph graph = new ImplicationGraph(clauses);
+		List<DirectedGraph<Literal>> components = graph.stronglyConnectedComponents();		
+		return literal_and_his_opposed_exists(components);
+	}
+	
+	private boolean literal_and_his_opposed_exists(List<DirectedGraph<Literal>> components) {
+		for (DirectedGraph<Literal> component : components) {
+			Set<Literal> literals = new HashSet<>();
+			for (Literal literal : component.vertices()) {
+				literals.add(literal.abs());
+			}
+			System.out.println(component.vertices());
+			System.out.println(literals);
+			if (literals.size() != component.vertices().size()) return false;
+		}
+		
+		return true;
 	}
 }
