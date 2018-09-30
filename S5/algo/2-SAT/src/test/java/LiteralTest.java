@@ -23,4 +23,29 @@ public class LiteralTest {
 		assertThat(l1.hashCode(), equalTo(l2.not().hashCode()));
 		assertThat(l1.not().not().hashCode(), equalTo(l1.hashCode()));
 	}
+	
+	@Test
+	public void testIsNegative() {
+		Literal l1 = new Literal("x"), l2 = new Literal("x", true);
+		assertThat(l1.isNegative(), equalTo(false));
+		assertThat(l2.isNegative(), equalTo(true));
+	}
+	
+	@Test
+	public void testAbs() {
+		Literal l1 = new Literal("x"), l2 = new Literal("x", true);
+		assertThat(l1.abs().isNegative(), equalTo(false));
+		assertThat(l2.abs().isNegative(), equalTo(false));
+	}
+	
+	@Test
+	public void testEquals() {
+		Literal l1 = new Literal("x"), l2 = new Literal("x"), l3 = new Literal("y");
+		assertThat(l1.equals(l1), equalTo(true));
+		assertThat(l1.equals(l2), equalTo(true));
+		assertThat(l2.equals(l1), equalTo(true));
+		assertThat(l1.equals(l1.not()), equalTo(false));
+		assertThat(l1.equals(null), equalTo(false));
+		assertThat(l1.equals(l3), equalTo(false));
+	}
 }

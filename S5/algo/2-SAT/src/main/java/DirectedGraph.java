@@ -105,7 +105,6 @@ public class DirectedGraph<Vertex> {
 	}
 	
 	List<DirectedGraph<Vertex>> stronglyConnectedComponents() {
-		System.out.println("_____ CALCUL ______");
 		final Map<Vertex, DepthFirstSearch<Vertex>.VertexData> dfs_data = (new DepthFirstSearch<>(this)).vertexData();
 		
 		Vector<Vertex> vertices = new Vector<>(dfs_data.keySet());
@@ -120,46 +119,31 @@ public class DirectedGraph<Vertex> {
 	    });
 		Collections.reverse(vertices);
 		
-//		System.out.println(vertices.toString());
-		for (Vertex vertex : vertices) {
-			System.out.println(vertex.toString() + " : " + dfs_data.get(vertex).timeDiscovered + ", " + dfs_data.get(vertex).timeEnded);
-		}
-		
-		DirectedGraph<Vertex> t_graph = transpose();
-		
-		System.out.println(t_graph.toString());
-		
+		DirectedGraph<Vertex> t_graph = transpose();		
 		Vector<DirectedGraph<Vertex>> components = new Vector<>();
 		Set<Vertex> visited_vertex = new HashSet<>();
 		
 		for (Vertex vertex : vertices) {
 			if (visited_vertex.contains(vertex)) continue;
 			
-			System.out.println("nouveau graphe");
 			DirectedGraph<Vertex> graph = new DirectedGraph<>();
-
 			Stack<Vertex> stack = new Stack<>();
 			stack.push(vertex);
 			
 			while (!stack.isEmpty()) {
 				Vertex parent = stack.pop();
-				if (visited_vertex.contains(parent)) continue;
 				visited_vertex.add(parent);
-				System.out.println("parent : " + parent.toString());
 				graph.addVertex(parent);
 								
 				for (Vertex child : t_graph.children(parent)) {
-					System.out.println(child.toString());
 					if (visited_vertex.contains(child)) continue;
 					stack.push(child);
 					graph.addArrow(parent, child);
 				}
 			}
-			System.out.println(graph.toString());
 			components.add(graph);
 		}
-		System.out.println("_____ CALCUL ______");
-		return components;//components.toArray((DirectedGraph<Vertex>[]) new Object[components.size()]);
+		return components;
 	}
 	
 	Set<Vertex> vertices() {

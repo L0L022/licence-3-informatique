@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.TreeSet;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -20,17 +19,11 @@ public class TwoSAT {
 	}
 	
 	public static TwoSAT fromFile(String fileName) throws IOException {
-		File f = new File(fileName);
-		BufferedReader b = new BufferedReader(new FileReader(f));
-		Scanner s = new Scanner(b);
-		
+		Scanner s = new Scanner(new BufferedReader(new FileReader(new File(fileName))));
 		Map<Integer, Literal> literals = new HashMap<Integer, Literal>();
 		Vector<Clause> clauses = new Vector<Clause>();
-		
-		//if (!s.hasNextInt()) exception
-		
-		int nb_literals = s.nextInt();
 				
+		int nb_literals = s.nextInt();
 		char next_char = 'a';
 		
 		for (int i = 1; i <= nb_literals; ++i) {
@@ -65,23 +58,24 @@ public class TwoSAT {
 		return sb.toString();
 	}
 	
-	public boolean is_satisfiable() {
+	public boolean isSatisfiable() {
 		ImplicationGraph graph = new ImplicationGraph(clauses);
 		List<DirectedGraph<Literal>> components = graph.stronglyConnectedComponents();		
-		return literal_and_his_opposed_exists(components);
+		return !a_literal_and_its_opposite_exist(components);
 	}
 	
-	private boolean literal_and_his_opposed_exists(List<DirectedGraph<Literal>> components) {
-		for (DirectedGraph<Literal> component : components) {
-			Set<Literal> literals = new HashSet<>();
-			for (Literal literal : component.vertices()) {
-				literals.add(literal.abs());
-			}
-			System.out.println(component.vertices());
-			System.out.println(literals);
-			if (literals.size() != component.vertices().size()) return false;
+	private boolean a_literal_and_its_opposite_exist(DirectedGraph<Literal> component) {
+		Set<Literal> literals = new HashSet<>();
+		for (Literal literal : component.vertices()) {
+			literals.add(literal.abs());
 		}
-		
-		return true;
+		return literals.size() != component.vertices().size();
+	}
+	
+	private boolean a_literal_and_its_opposite_exist(List<DirectedGraph<Literal>> components) {
+		for (DirectedGraph<Literal> component : components) {
+			if (a_literal_and_its_opposite_exist(component)) return true;
+		}
+		return false;
 	}
 }

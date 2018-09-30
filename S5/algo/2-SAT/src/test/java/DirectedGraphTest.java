@@ -1,8 +1,8 @@
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 
 import org.junit.Test;
 
@@ -34,8 +34,7 @@ public class DirectedGraphTest {
 		graph.addVertex(10);
 		graph.addVertex(11);
 		assertThat(graph.order(), equalTo(2));
-		assertThat(graph.hasVertex(10), equalTo(true));
-		assertThat(graph.hasVertex(11), equalTo(true));
+		assertThat(graph.hasVertices(Arrays.asList(10, 11)), equalTo(true));
 	}
 	
 	@Test
@@ -130,6 +129,17 @@ public class DirectedGraphTest {
 		assertThat(graph.size(), equalTo(2));
 		assertThat(graph.hasArrow(0, 1), equalTo(true));
 		assertThat(graph.hasArrow(2, 3), equalTo(true));
+	}
+	
+	@Test
+	public void testAddArrow_twice_same() {
+		DirectedGraph<Integer> graph = new DirectedGraph<Integer>();
+		graph.addArrow(0, 1);
+		graph.addArrow(0, 1);
+		
+		assertThat(graph.order(), equalTo(2));
+		assertThat(graph.size(), equalTo(1));
+		assertThat(graph.hasArrow(0, 1), equalTo(true));
 	}
 	
 	@Test
@@ -288,7 +298,7 @@ public class DirectedGraphTest {
 		
 		List<DirectedGraph<Integer>> c = graph.stronglyConnectedComponents();
 		
-		assertThat(c.size(), equalTo(2));
+		assertThat(c.size(), equalTo(2));		
 		assertThat(c.get(0).hasVertex(0) != c.get(1).hasVertex(0), equalTo(true));
 		assertThat(c.get(0).hasVertex(1) != c.get(1).hasVertex(1), equalTo(true));
 	}
@@ -303,9 +313,7 @@ public class DirectedGraphTest {
 		List<DirectedGraph<Integer>> c = graph.stronglyConnectedComponents();
 		
 		assertThat(c.size(), equalTo(1));
-		assertThat(c.get(0).hasVertex(0), equalTo(true));
-		assertThat(c.get(0).hasVertex(1), equalTo(true));
-		assertThat(c.get(0).hasVertex(2), equalTo(true));
+		assertThat(graph.hasVertices(Arrays.asList(0, 1, 2)), equalTo(true));
 	}
 	
 	@Test

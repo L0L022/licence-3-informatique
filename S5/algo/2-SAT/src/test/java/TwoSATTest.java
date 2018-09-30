@@ -25,7 +25,7 @@ public class TwoSATTest {
 	}
 
 	@Test
-	public void testIs_satisfiable_true() {
+	public void testIsSatisfiable_true() {
 		// { x ∨ y, y ∨ ¬x, ¬x ∨ ¬y }
 		
 		Literal[] lit = {new Literal("x"), new Literal("y")};
@@ -33,11 +33,11 @@ public class TwoSATTest {
 		
 		TwoSAT twoSAT = new TwoSAT(clauses);
 		
-		assertThat(twoSAT.is_satisfiable(), equalTo(true));
+		assertThat(twoSAT.isSatisfiable(), equalTo(true));
 	}
 	
 	@Test
-	public void testIs_satisfiable_false() {
+	public void testIsSatisfiable_false() {
 		// { x ∨ y, y ∨ ¬x, x ∨ ¬y, ¬x ∨ ¬y }
 		
 		Literal[] lit = {new Literal("x"), new Literal("y")};
@@ -45,7 +45,7 @@ public class TwoSATTest {
 		
 		TwoSAT twoSAT = new TwoSAT(clauses);
 		
-		assertThat(twoSAT.is_satisfiable(), equalTo(false));
+		assertThat(twoSAT.isSatisfiable(), equalTo(false));
 	}
 
 }
