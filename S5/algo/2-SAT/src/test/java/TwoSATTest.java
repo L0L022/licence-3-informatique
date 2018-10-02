@@ -25,6 +25,30 @@ public class TwoSATTest {
 	}
 
 	@Test
+	public void testIsSatisfiable_one_clause_same_lit() {
+		// { x ∨ x }
+		
+		Literal[] lit = {new Literal("x")};
+		Clause[] clauses = {new Clause(lit[0], lit[0])};
+		
+		TwoSAT twoSAT = new TwoSAT(clauses);
+		
+		assertThat(twoSAT.isSatisfiable(), equalTo(true));
+	}
+	
+	@Test
+	public void testIsSatisfiable_one_clause_diff_lit() {
+		// { x ∨ y }
+		
+		Literal[] lit = {new Literal("x"), new Literal("y")};
+		Clause[] clauses = {new Clause(lit[0], lit[1])};
+		
+		TwoSAT twoSAT = new TwoSAT(clauses);
+		
+		assertThat(twoSAT.isSatisfiable(), equalTo(true));
+	}
+	
+	@Test
 	public void testIsSatisfiable_true() {
 		// { x ∨ y, y ∨ ¬x, ¬x ∨ ¬y }
 		
