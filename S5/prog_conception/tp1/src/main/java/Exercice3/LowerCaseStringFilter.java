@@ -1,10 +1,7 @@
 package Exercice3;
 
 /**
- * Convertit en minuscule les caractères.
- * 
- * @author loic
- *
+ * Convertit les caractères en minuscule.
  */
 public class LowerCaseStringFilter implements StringFilter {
 

@@ -1,20 +1,24 @@
 package Exercice4;
 
-
 /**
- * La valeur absolue de la formule.
- * 
- * @author loic
+ * La valeur absolue d'une formule.
+ *
+ * @author Loïc Escales
  *
  */
 public class AbsoluteValue implements Formula {
 
-	Formula formula;
-	
-	AbsoluteValue(Formula formula) {
+	private Formula formula;
+
+	/**
+	 * Construit AbsoluteValue.
+	 *
+	 * @param formula La formule en entrée.
+	 */
+	public AbsoluteValue(Formula formula) {
 		this.formula = formula;
 	}
-	
+
 	@Override
 	public String asString() {
 		return "|" + formula.asString() + "|";

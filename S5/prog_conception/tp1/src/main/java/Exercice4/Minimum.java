@@ -2,18 +2,23 @@ package Exercice4;
 
 /**
  * Le minimum d'un ensemble de formules.
- * 
- * @author loic
+ *
+ * @author Loïc Escales
  *
  */
 public class Minimum implements Formula {
 
-	Formula[] formulas;
-	
-	Minimum(Formula[] formulas) {
+	private Formula[] formulas;
+
+	/**
+	 * Construit Minimum.
+	 *
+	 * @param formulas La liste des formules en entrée.
+	 */
+	public Minimum(Formula[] formulas) {
 		this.formulas = formulas;
 	}
-	
+
 	@Override
 	public String asString() {
 		StringBuilder sb = new StringBuilder("min(");

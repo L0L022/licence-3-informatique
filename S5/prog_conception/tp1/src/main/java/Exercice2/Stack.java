@@ -4,65 +4,65 @@ import Exercice1.Vector;
 
 /**
  * Représente une pile d'entiers.
- * 
- * @author loic
- *
  */
 public class Stack {
-	
+
 	/**
-	 * Les entiers empilés
+	 * Les entiers empilés.
 	 */
 	private Vector elements;
-	
-	Stack() {
+
+	/**
+	 * Construit une pile vide d'entier.
+	 */
+	public Stack() {
 		elements = new Vector();
 	}
-	
+
 	/**
 	 * Empile value.
-	 * 
-	 * @param value Valeur empilée.
+	 *
+	 * @param value Valeur qui est empilée.
 	 */
-	void push(int value) {
+	public void push(int value) {
 		elements.add(value);
 	}
-	
+
 	/**
-	 * Retourne l'entier en haut de la pile.
-	 * 
-	 * @return entier en haut de la pile.
+	 * Retourne l'entier qui est en haut de la pile.
+	 *
+	 * @return L'entier en haut de la pile.
 	 */
-	int peek() {
+	public int peek() {
 		return elements.get(elements.size() - 1);
 	}
-	
+
 	/**
-	 * Dépile l'entier en haut de la pile et le retourne.
-	 * 
-	 * @return l'entier dépilé.
+	 * Dépile l'entier en haut de la pile et le renvoie.
+	 *
+	 * @return L'entier dépilé.
 	 */
-	int pop() {
+	public int pop() {
 		int last = peek();
 		elements.resize(elements.size() - 1);
 		return last;
 	}
-	
+
 	/**
 	 * Retourne le nombre d'entiers dans la pile.
-	 * 
-	 * @return le nombre d'entiers dans la pile.
+	 *
+	 * @return Le nombre d'entiers dans la pile.
 	 */
-	int size() {
+	public int size() {
 		return elements.size();
 	}
-	
+
 	/**
 	 * Indique si la pile est vide.
-	 * 
-	 * @return vrai si la pile est vide sinon faux.
+	 *
+	 * @return Vrai si la pile est vide sinon faux.
 	 */
-	boolean isEmpty() {
+	public boolean isEmpty() {
 		return elements.isEmpty();
 	}
 }

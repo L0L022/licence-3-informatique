@@ -1,10 +1,7 @@
 package Exercice3;
 
 /**
- * Convertit en majuscule les caractères.
- * 
- * @author loic
- *
+ * Convertit les caractères en majuscule.
  */
 public class UpperCaseStringFilter implements StringFilter {
 

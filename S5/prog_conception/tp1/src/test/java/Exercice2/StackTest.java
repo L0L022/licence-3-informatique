@@ -1,8 +1,7 @@
 package Exercice2;
 
-import static junit.framework.TestCase.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.Test;
 
@@ -22,10 +21,10 @@ public class StackTest {
 	@Test
 	public void testPeek() {
 		Stack stack = new Stack();
-		
+
 		assertThat(stack.peek(), equalTo(0));
 		assertThat(stack.size(), equalTo(0));
-		
+
 		stack.push(1);
 		assertThat(stack.peek(), equalTo(1));
 		assertThat(stack.size(), equalTo(1));
@@ -34,10 +33,10 @@ public class StackTest {
 	@Test
 	public void testPop() {
 		Stack stack = new Stack();
-		
+
 		assertThat(stack.pop(), equalTo(0));
 		assertThat(stack.size(), equalTo(0));
-		
+
 		stack.push(1);
 		assertThat(stack.pop(), equalTo(1));
 		assertThat(stack.size(), equalTo(0));

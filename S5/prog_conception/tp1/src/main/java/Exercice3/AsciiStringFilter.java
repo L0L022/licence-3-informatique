@@ -2,9 +2,6 @@ package Exercice3;
 
 /**
  * Conserve les caractères appartenant à l'encodage ASCII.
- * 
- * @author loic
- *
  */
 public class AsciiStringFilter implements StringFilter {
 

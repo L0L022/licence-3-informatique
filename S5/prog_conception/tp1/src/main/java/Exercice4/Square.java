@@ -1,19 +1,24 @@
 package Exercice4;
 
 /**
- * La formule puissance deux.
- * 
- * @author loic
+ * Le carré d'une formule.
+ *
+ * @author Loïc Escales
  *
  */
 public class Square implements Formula {
 
-	Formula formula;
-	
-	Square(Formula formula) {
+	private Formula formula;
+
+	/**
+	 * Construit Square.
+	 *
+	 * @param formula La formule en entrée.
+	 */
+	public Square(Formula formula) {
 		this.formula = formula;
 	}
-	
+
 	@Override
 	public String asString() {
 		return "(" + formula.asString() + ")²";

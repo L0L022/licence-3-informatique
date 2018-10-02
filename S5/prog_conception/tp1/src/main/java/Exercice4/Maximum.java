@@ -2,18 +2,23 @@ package Exercice4;
 
 /**
  * Le maximum d'un ensemble de formules.
- * 
- * @author loic
+ *
+ * @author Loïc Escales
  *
  */
 public class Maximum implements Formula {
 
-	Formula[] formulas;
-	
-	Maximum(Formula[] formulas) {
+	private Formula[] formulas;
+
+	/**
+	 * Construit Maximum.
+	 *
+	 * @param formulas La liste des formules en entrée.
+	 */
+	public Maximum(Formula[] formulas) {
 		this.formulas = formulas;
 	}
-	
+
 	@Override
 	public String asString() {
 		StringBuilder sb = new StringBuilder("max(");

@@ -1,24 +1,30 @@
 package Exercice4;
 
 /**
- * La somme de plusieurs formules.
- * 
- * @author loic
+ * Le produit de plusieurs formules.
+ *
+ * @author Loïc Escales
  *
  */
-public class Sum implements Formula {
-	Formula[] formulas;
-	
-	Sum(Formula[] formulas) {
+public class Product implements Formula {
+
+	private Formula[] formulas;
+
+	/**
+	 * Construit Product.
+	 *
+	 * @param formulas La liste des formules à multiplier.
+	 */
+	public Product(Formula[] formulas) {
 		this.formulas = formulas;
 	}
-	
+
 	@Override
 	public String asString() {
 		StringBuilder sb = new StringBuilder("(");
 		for (int i = 0; i < formulas.length; ++i) {
 			if (i != 0) {
-				sb.append("+");
+				sb.append("*");
 			}
 			sb.append(formulas[i].asString());
 		}
@@ -28,9 +34,9 @@ public class Sum implements Formula {
 
 	@Override
 	public double asValue() {
-		double value = 0.0;
+		double value = 1.0;
 		for (Formula formula : formulas) {
-			value += formula.asValue();
+			value *= formula.asValue();
 		}
 		return value;
 	}

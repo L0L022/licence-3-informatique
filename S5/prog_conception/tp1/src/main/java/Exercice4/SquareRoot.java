@@ -1,19 +1,24 @@
 package Exercice4;
 
 /**
- * La racine carré de la formule.
- * 
- * @author loic
+ * La racine carrée d'une formule.
+ *
+ * @author Loïc Escales
  *
  */
 public class SquareRoot implements Formula {
 
-	Formula formula;
-	
-	SquareRoot(Formula formula) {
+	private Formula formula;
+
+	/**
+	 * Construit SquareRoot.
+	 *
+	 * @param formula La formule en entrée.
+	 */
+	public SquareRoot(Formula formula) {
 		this.formula = formula;
 	}
-	
+
 	@Override
 	public String asString() {
 		return "√(" + formula.asString() + ")";
