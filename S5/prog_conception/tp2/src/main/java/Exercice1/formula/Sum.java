@@ -1,8 +1,19 @@
-package formula;
+package Exercice1.formula;
 
+/**
+ * La somme de plusieurs formules.
+ *
+ * @author Loïc Escales
+ *
+ */
 public class Sum extends VariadicOperator {
 
-	Sum(Formula[] formulas) {
+	/**
+	 * Construit Sum.
+	 *
+	 * @param formulas La liste des formules à additionner.
+	 */
+	public Sum(Formula[] formulas) {
 		super(formulas);
 	}
 

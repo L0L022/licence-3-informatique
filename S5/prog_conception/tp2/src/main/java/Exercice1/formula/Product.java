@@ -1,8 +1,19 @@
-package formula;
+package Exercice1.formula;
 
+/**
+ * Le produit de plusieurs formules.
+ *
+ * @author Loïc Escales
+ *
+ */
 public class Product extends VariadicOperator {
 
-	Product(Formula[] formulas) {
+	/**
+	 * Construit Product.
+	 *
+	 * @param formulas La liste des formules à multiplier.
+	 */
+	public Product(Formula[] formulas) {
 		super(formulas);
 	}
 
