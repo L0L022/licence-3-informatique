@@ -63,4 +63,9 @@ public class Stack {
 	public boolean isEmpty() {
 		return elements.isEmpty();
 	}
+
+	@Override
+	public String toString() {
+		return elements.toString();
+	}
 }

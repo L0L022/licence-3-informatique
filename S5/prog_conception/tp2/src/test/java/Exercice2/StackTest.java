@@ -60,4 +60,12 @@ public class StackTest {
 		assertThat(stack.isEmpty(), equalTo(false));
 	}
 
+	@Test
+	public void testToString() {
+		Stack stack = new Stack();
+		stack.push(Integer.valueOf(1));
+		stack.push(Integer.valueOf(2));
+		stack.push(Integer.valueOf(3));
+		assertThat(stack.toString(), equalTo("[1, 2, 3]"));
+	}
 }

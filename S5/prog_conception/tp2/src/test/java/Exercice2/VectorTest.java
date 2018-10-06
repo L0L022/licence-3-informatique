@@ -137,4 +137,12 @@ public class VectorTest {
 		assertThat(vector.get(2), equalTo((Object) Integer.valueOf(0)));
 	}
 
+	@Test
+	public void testToString() {
+		Vector vector = new Vector();
+		vector.add(Integer.valueOf(12));
+		vector.add(Integer.valueOf(13));
+		vector.add(Integer.valueOf(14));
+		assertThat(vector.toString(), equalTo("[12, 13, 14]"));
+	}
 }
