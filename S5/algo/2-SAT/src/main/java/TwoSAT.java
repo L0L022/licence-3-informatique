@@ -57,7 +57,7 @@ public class TwoSAT {
 
 		Vector<Clause> clauses = new Vector<>();
 
-		while (s.hasNext()) {
+		while (s.hasNextInt()) {
 			Literal left_lit = number_to_literal.get(s.nextInt());
 			Literal right_lit = number_to_literal.get(s.nextInt());
 			clauses.add(new Clause(left_lit, right_lit));
