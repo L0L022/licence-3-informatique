@@ -97,7 +97,7 @@ public class TwoSATTest {
 	@Test
 	public void testIsSatisfiable_sat6bis() throws IOException {
 		TwoSAT twoSAT = TwoSAT.fromFile("src/test/resources/sat6bis");
-		assertThat(twoSAT.isSatisfiable(), equalTo(false));
+		assertThat(twoSAT.isSatisfiable(), equalTo(true));
 	}
 
 	@Test
