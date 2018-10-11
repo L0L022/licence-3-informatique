@@ -59,11 +59,10 @@ public class VectorTest {
 		assertThat(vector.size(), equalTo(120));
 	}
 
-	@Test
+	@Test(expected = IndexOutOfBoundsException.class)
 	public void testResize_Negative() {
 		Vector<Integer> vector = new Vector<>();
 		vector.resize(-10);
-		assertThat(vector.size(), greaterThanOrEqualTo(0));
 	}
 
 	@Test
@@ -220,5 +219,32 @@ public class VectorTest {
 		vector.add(Integer.valueOf(14));
 		vector.add(Integer.valueOf(11));
 		assertThat(vector.isSorted(), equalTo(false));
+	}
+
+	@Test
+	public void testIsSorted_comparator_true() {
+		Vector<Integer> vector = new Vector<>();
+		vector.add(Integer.valueOf(14));
+		vector.add(Integer.valueOf(13));
+		vector.add(Integer.valueOf(12));
+		assertThat(vector.isSorted((l, r) -> r.compareTo(l)), equalTo(true));
+	}
+
+	@Test
+	public void testIsSorted_comparator_false() {
+		Vector<Integer> vector = new Vector<>();
+		vector.add(Integer.valueOf(14));
+		vector.add(Integer.valueOf(13));
+		vector.add(Integer.valueOf(12));
+		assertThat(vector.isSorted((l, r) -> l.compareTo(r)), equalTo(false));
+	}
+
+	@Test
+	public void testIsSorted_static() {
+		Vector<Integer> vector = new Vector<>();
+		vector.add(Integer.valueOf(12));
+		vector.add(Integer.valueOf(13));
+		vector.add(Integer.valueOf(14));
+		assertThat(Vector.isSorted(vector), equalTo(true));
 	}
 }

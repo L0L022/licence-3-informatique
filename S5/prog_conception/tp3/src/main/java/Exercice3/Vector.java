@@ -1,6 +1,7 @@
 package Exercice3;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 
 /**
@@ -153,10 +154,10 @@ public class Vector<T> implements Iterable<T> {
 	/**
 	 * Place l'élément element à l'indice index dans le vecteur.
 	 *
-	 * @param index   L'indice de l'emplacement de l'élément.
+	 * @param index L'indice de l'emplacement de l'élément.
 	 * @param element L'élément à placer.
 	 * @throws IndexOutOfBoundsException Si l'indice n'est pas dans cet intervalle :
-	 *                                   [0; size[.
+	 *             [0; size[.
 	 */
 	public void set(int index, T element) {
 		if (!validIndex(index)) {
@@ -171,7 +172,7 @@ public class Vector<T> implements Iterable<T> {
 	 * @param index L'indice de l'emplacement de l'élément
 	 * @return L'élément à l'emplacement index.
 	 * @throws IndexOutOfBoundsException Si l'indice n'est pas dans cet intervalle :
-	 *                                   [0; size[.
+	 *             [0; size[.
 	 */
 	@SuppressWarnings("unchecked")
 	public T get(int index) {
@@ -208,5 +209,47 @@ public class Vector<T> implements Iterable<T> {
 	@Override
 	public Iterator<T> iterator() {
 		return new VectorIterator();
+	}
+
+	/**
+	 * Indique si le vecteur est rangé par ordre croissant.
+	 *
+	 * @return Vrai si le vecteur est rangé par ordre croissant sinon faux.
+	 */
+	public boolean isSorted() {
+		for (int i = 1; i < size(); ++i) {
+			@SuppressWarnings("unchecked")
+			Comparable<T> comp = (Comparable<T>) get(i - 1);
+			if (comp.compareTo(get(i)) > 0) {
+				return false;
+			}
+		}
+		return true;
+
+	}
+
+	/**
+	 * Indique si le vecteur est rangé par ordre croissant selon un comparateur.
+	 *
+	 * @param comparator Le comparateur utilisé pour comparer les éléments.
+	 * @return Vrai si le vecteur est rangé par ordre croissant sinon faux.
+	 */
+	public boolean isSorted(Comparator<T> comparator) {
+		for (int i = 1; i < size(); ++i) {
+			if (comparator.compare(get(i - 1), get(i)) > 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Indique si le vecteur est rangé par ordre croissant.
+	 *
+	 * @param vector Le vecteur qui est testé.
+	 * @return Vrai si le vecteur est rangé par ordre croissant sinon faux.
+	 */
+	public static <E extends Comparable<? super E>> boolean isSorted(Vector<E> vector) {
+		return vector.isSorted();
 	}
 }
