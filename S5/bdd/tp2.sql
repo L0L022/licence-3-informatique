@@ -78,6 +78,11 @@ INSERT INTO Villes VALUES ('Marseille');
 INSERT INTO Villes VALUES ('Arles');
 INSERT INTO Villes VALUES ('Gap');
 INSERT INTO Villes VALUES ('Abeilhan');
+INSERT INTO Villes VALUES ('V1');
+INSERT INTO Villes VALUES ('V2');
+INSERT INTO Villes VALUES ('V3');
+INSERT INTO Villes VALUES ('V4');
+INSERT INTO Villes VALUES ('V5');
 
 INSERT INTO Bus VALUES (1, 10);
 INSERT INTO Bus VALUES (2, 20);
@@ -85,21 +90,34 @@ INSERT INTO Bus VALUES (3, 30);
 INSERT INTO Bus VALUES (4, 40);
 INSERT INTO Bus VALUES (5, 50);
 
-INSERT INTO Trajets VALUES (01, 1);
-INSERT INTO Trajets VALUES (02, 1);
-INSERT INTO Trajets VALUES (03, 2);
-INSERT INTO Trajets VALUES (04, 2);
+INSERT INTO Trajets VALUES (1, 1);
+INSERT INTO Trajets VALUES (2, 1);
+INSERT INTO Trajets VALUES (3, 2);
+INSERT INTO Trajets VALUES (4, 2);
 
 INSERT INTO Etapes VALUES (1, 'Marseille', TO_DATE('16/09/2018 08:00:00'), TO_DATE('16/09/2018 08:05:00'));
-INSERT INTO Etapes VALUES (2, 'Arles', TO_DATE('16/09/2018 09:30:00'), TO_DATE('16/09/2018 09:45:00'));
-INSERT INTO Etapes VALUES (3, 'Gap', TO_DATE('17/09/2018 01:55:00'), TO_DATE('17/09/2018 03:00:01'));
-INSERT INTO Etapes VALUES (4, 'Abeilhan', TO_DATE('18/09/2018 14:14:14'), TO_DATE('18/09/2018 14:20:59'));
+INSERT INTO Etapes VALUES (1, 'Arles', TO_DATE('16/09/2018 09:30:00'), TO_DATE('16/09/2018 09:45:00'));
+INSERT INTO Etapes VALUES (1, 'Gap', TO_DATE('17/09/2018 01:55:00'), TO_DATE('17/09/2018 03:00:01'));
+INSERT INTO Etapes VALUES (1, 'Abeilhan', TO_DATE('18/09/2018 14:14:14'), TO_DATE('18/09/2018 14:20:59'));
+INSERT INTO Etapes VALUES (2, 'V1', TO_DATE('16/09/2018 08:00:00'), TO_DATE('16/09/2018 08:05:00'));
+INSERT INTO Etapes VALUES (2, 'V2', TO_DATE('16/09/2018 09:00:00'), TO_DATE('16/09/2018 09:05:00'));
+INSERT INTO Etapes VALUES (2, 'V3', TO_DATE('16/09/2018 10:00:00'), TO_DATE('16/09/2018 10:05:00'));
+INSERT INTO Etapes VALUES (2, 'V4', TO_DATE('16/09/2018 11:00:00'), TO_DATE('16/09/2018 11:05:00'));
+INSERT INTO Etapes VALUES (2, 'V5', TO_DATE('16/09/2018 12:00:00'), TO_DATE('16/09/2018 12:05:00'));
+
+-- INSERT INTO Etapes VALUES (1, 'Marseille', TO_DATE('16/09/2018 08:00:00'), TO_DATE('16/09/2018 08:04:59'))
+-- Rapport d'erreur -
+-- ORA-02290: violation de contraintes (L3INFO_32.DOM_DATEAD) de vérification
 
 INSERT INTO Tarifs VALUES ('Marseille', 'Abeilhan', 50.63);
 INSERT INTO Tarifs VALUES ('Abeilhan', 'Marseille', 50.50);
 INSERT INTO Tarifs VALUES ('Marseille', 'Arles', 10.10);
 INSERT INTO Tarifs VALUES ('Marseille', 'Gap', 25.42);
 INSERT INTO Tarifs VALUES ('Gap', 'Abeilhan', 200.99);
+INSERT INTO Tarifs VALUES ('Arles', 'Gap', 40.23);
+INSERT INTO Tarifs VALUES ('Arles', 'Abeilhan', 30.53);
+INSERT INTO Tarifs VALUES ('V1', 'V3', 5);
+INSERT INTO Tarifs VALUES ('V2', 'V4', 5);
 
 INSERT INTO Clients VALUES (0, 'Loïc, chaud comme la braise.', 'Près de chez toi...');
 INSERT INTO Clients VALUES (1, 'Killian, Archiduc des crêpes', 'Poudlard');
@@ -108,11 +126,49 @@ INSERT INTO Clients VALUES (3, 'Le joker de Valmante', 'derrière toi');
 INSERT INTO Clients VALUES (4, 'Khaleesi', 'Ville de Qarth');
 INSERT INTO Clients VALUES (5, 'Marie reine d Ecosse', 'au dessus de toi');
 
-INSERT INTO Reservations VALUES (001, 0, 
+INSERT INTO Reservations VALUES (1, 1, 1, 'Arles', 'Gap', 1);
+INSERT INTO Reservations VALUES (2, 1, 1, 'Marseille', 'Abeilhan', 2);
+INSERT INTO Reservations VALUES (3, 1, 1, 'Arles', 'Abeilhan', 4);
+INSERT INTO Reservations VALUES (4, 2, 2, 'V1', 'V3', 2);
+INSERT INTO Reservations VALUES (5, 3, 2, 'V2', 'V4', 3);
+
+-- INSERT INTO Reservations VALUES (3, 1, 1, 'Arles', 'Abeilhan', 0)
+-- Rapport d'erreur -
+-- ORA-02290: violation de contraintes (L3INFO_32.DOM_NBPLACES) de vérification
+
+-- INSERT INTO Reservations VALUES (3, 1, 1, 'Arles', 'Arles', 4)
+-- Rapport d'erreur -
+-- ORA-02290: violation de contraintes (L3INFO_32.DOM_VILLEAD) de vérification
 
 -- Question 3
 -- 1
+
+CREATE OR REPLACE VIEW ReservationsAvecHorraire AS
+SELECT R.NumR, R.NumC, R.NumT, R.VilleD, R.VilleA, R.NBPLACES, E2.DateA AS "VD_DATEA",E2.DateD AS "VD_DATED", E1.DateA AS "VA_DATEA", E1.DateD AS "VA_DATED"
+FROM Reservations R
+INNER JOIN Etapes E1 ON R.NumT = E1.NumT AND R.VilleA = E1.NomV
+INNER JOIN Etapes E2 ON R.NumT = E2.NumT AND R.VilleD = E2.NomV;
+
 -- 2
+
+CREATE OR REPLACE VIEW NbPlacesReserveesEtapes AS
+SELECT NVL((
+    SELECT SUM(NbPlaces)
+    FROM ReservationsAvecHorraire R
+    WHERE R.NumT = E.NumT
+    AND E.DATED BETWEEN VD_DATED AND VA_DATEA
+), 0) || ' places sont réservées au départ de ' || NomV || ' pour le trajet ' || NumT AS "resultat"
+FROM Etapes E;
+
 -- 3
+
+CREATE OR REPLACE VIEW Liaisons AS
+SELECT E1.NomV AS "VilleD", E2.NomV AS "VilleA", E1.DateA AS "VD_DATEA", E1.DateD AS "VD_DATED", E2.DateA AS "VA_DATEA", E2.DateD AS "VA_DATED"
+FROM Etapes E1
+INNER JOIN Etapes E2 ON E1.NumT = E2.NumT
+WHERE E2.DateD - E1.DateA > 0
+AND E1.NomV <> E2.NomV
+ORDER BY E1.NomV;
+
 -- 4
 -- 5												
