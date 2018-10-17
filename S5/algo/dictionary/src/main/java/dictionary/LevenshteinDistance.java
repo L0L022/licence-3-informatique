@@ -32,22 +32,28 @@ public class LevenshteinDistance {
 			return word1.length();
 		}
 
-		int m[][] = new int[word1.length() + 1][word2.length() + 1];
+		int m = word1.length() + 1;
+		int n = word2.length() + 1;
+		int d[][] = new int[m][n];
 
-		for (int i = 0; i < word1.length() + 1; ++i) {
-			m[i][0] = i;
+		for (int i = 0; i < m; ++i) {
+			d[i][0] = i;
 		}
 
-		for (int i = 0; i < word2.length() + 1; ++i) {
-			m[0][i] = i;
+		for (int j = 0; j < n; ++j) {
+			d[0][j] = j;
 		}
 
-		for (int i = 0; i < word1.length() + 1; ++i) {
-			for (int j = 0; j < word2.length() + 1; ++j) {
+		for (int i = 1; i < m; ++i) {
+			for (int j = 1; j < n; ++j) {
+				int deletionCost = d[i - 1][j] + 1;
+				int insertionCost = d[i][j - 1] + 1;
+				int substitutionCost = d[i - 1][j - 1] + (word1.charAt(i - 1) == word2.charAt(j - 1) ? 0 : 1);
 
+				d[i][j] = Math.min(Math.min(deletionCost, insertionCost), substitutionCost);
 			}
 		}
 
-		return 0;
+		return d[m - 1][n - 1];
 	}
 }

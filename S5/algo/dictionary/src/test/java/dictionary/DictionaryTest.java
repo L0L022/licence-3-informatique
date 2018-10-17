@@ -3,6 +3,7 @@ package dictionary;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,7 +13,7 @@ import org.junit.Test;
 public class DictionaryTest {
 
 	@Test
-	public void testFromFile() {
+	public void testFromFile() throws FileNotFoundException {
 		Dictionary dic = Dictionary.fromFile("src/test/resources/dico.txt");
 
 		assertThat(dic.contains(""), equalTo(false));
