@@ -16,7 +16,7 @@ public class LevenshteinFuzzySearch implements FuzzySearch {
 		for (String w : words) {
 			distancePerWord.put(w, (new LevenshteinDistance(word, w)).editDistance());
 		}
-		System.out.println(distancePerWord);
+//		System.out.println(distancePerWord);
 		nbWords = Math.min(nbWords, distancePerWord.size());
 		List<String> words_result = new Vector<>(nbWords);
 

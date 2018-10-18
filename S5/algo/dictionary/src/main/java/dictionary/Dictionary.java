@@ -28,7 +28,7 @@ public class Dictionary {
 	 */
 	public Dictionary(Set<String> words) {
 		this.words = words;
-		triSearch = new TrigramFuzzySearch();
+		triSearch = new TrigramFuzzySearch(words);
 		levenSearch = new LevenshteinFuzzySearch();
 	}
 

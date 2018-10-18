@@ -11,6 +11,13 @@ public class TrigramFuzzySearch implements FuzzySearch {
 	private Set<String> words;
 	private Map<String, LinkedList<String>> trigramsToWords;
 
+	public TrigramFuzzySearch() {
+	}
+
+	public TrigramFuzzySearch(Set<String> words) {
+		buildTrigramsToWords(words);
+	}
+
 	@Override
 	public List<String> search(String word, Set<String> words, int nbWords) {
 		buildTrigramsToWords(words);
@@ -28,7 +35,7 @@ public class TrigramFuzzySearch implements FuzzySearch {
 			}
 		}
 
-		System.out.println(nbTrigramsPerWord);
+//		System.out.println(nbTrigramsPerWord);
 
 		nbWords = Math.min(nbWords, nbTrigramsPerWord.size());
 		List<String> words_result = new Vector<>(nbWords);
@@ -54,6 +61,7 @@ public class TrigramFuzzySearch implements FuzzySearch {
 			return;
 		}
 
+		this.words = words;
 		trigramsToWords = new HashMap<>();
 
 		for (String word : words) {
