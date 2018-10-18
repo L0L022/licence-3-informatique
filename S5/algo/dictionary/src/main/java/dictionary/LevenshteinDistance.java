@@ -2,7 +2,7 @@ package dictionary;
 
 public class LevenshteinDistance {
 
-	int editDistance;
+	private int editDistance;
 
 	/**
 	 * Construit l'algorithme de la distance de Levenshtein.
