@@ -95,10 +95,10 @@ INSERT INTO Trajets VALUES (2, 1);
 INSERT INTO Trajets VALUES (3, 2);
 INSERT INTO Trajets VALUES (4, 2);
 
-INSERT INTO Etapes VALUES (1, 'Marseille', TO_DATE('16/09/2018 08:00:00'), TO_DATE('16/09/2018 08:05:00'));
-INSERT INTO Etapes VALUES (1, 'Arles', TO_DATE('16/09/2018 09:30:00'), TO_DATE('16/09/2018 09:45:00'));
-INSERT INTO Etapes VALUES (1, 'Gap', TO_DATE('17/09/2018 01:55:00'), TO_DATE('17/09/2018 03:00:01'));
-INSERT INTO Etapes VALUES (1, 'Abeilhan', TO_DATE('18/09/2018 14:14:14'), TO_DATE('18/09/2018 14:20:59'));
+--INSERT INTO Etapes VALUES (1, 'Marseille', TO_DATE('16/09/2018 08:00:00'), TO_DATE('16/09/2018 08:05:00'));
+--INSERT INTO Etapes VALUES (1, 'Arles', TO_DATE('16/09/2018 09:30:00'), TO_DATE('16/09/2018 09:45:00'));
+--INSERT INTO Etapes VALUES (1, 'Gap', TO_DATE('17/09/2018 01:55:00'), TO_DATE('17/09/2018 03:00:01'));
+--INSERT INTO Etapes VALUES (1, 'Abeilhan', TO_DATE('18/09/2018 14:14:14'), TO_DATE('18/09/2018 14:20:59'));
 INSERT INTO Etapes VALUES (2, 'V1', TO_DATE('16/09/2018 08:00:00'), TO_DATE('16/09/2018 08:05:00'));
 INSERT INTO Etapes VALUES (2, 'V2', TO_DATE('16/09/2018 09:00:00'), TO_DATE('16/09/2018 09:05:00'));
 INSERT INTO Etapes VALUES (2, 'V3', TO_DATE('16/09/2018 10:00:00'), TO_DATE('16/09/2018 10:05:00'));
@@ -163,12 +163,57 @@ FROM Etapes E;
 -- 3
 
 CREATE OR REPLACE VIEW Liaisons AS
-SELECT E1.NomV AS "VilleD", E2.NomV AS "VilleA", E1.DateA AS "VD_DATEA", E1.DateD AS "VD_DATED", E2.DateA AS "VA_DATEA", E2.DateD AS "VA_DATED"
+SELECT E1.NumT, E1.NomV AS "VilleD", E2.NomV AS "VilleA", E1.DateA AS "VD_DATEA", E1.DateD AS "VD_DATED", E2.DateA AS "VA_DATEA", E2.DateD AS "VA_DATED"
 FROM Etapes E1
 INNER JOIN Etapes E2 ON E1.NumT = E2.NumT
 WHERE E2.DateD - E1.DateA > 0
 AND E1.NomV <> E2.NomV
-ORDER BY E1.NomV;
+ORDER BY E1.NomV, E2.NomV;
 
 -- 4
--- 5												
+
+CREATE OR REPLACE VIEW NbPlacesOccupeesLiaisons AS
+SELECT (
+    CASE MAX(E2."NbPlacesReserv")
+        WHEN 0 THEN '0 place occupée entre ' || L."VilleD" || ' et ' || L."VilleA" || ' pour le trajet ' || L.NUMT
+        ELSE MAX(E2."NbPlacesReserv") || ' places au maximum sont occupées entre ' || L."VilleD" || ' et ' || L."VilleA" || ' pour le trajet ' || L.NUMT
+    END
+) AS "resultat"
+FROM LIAISONS L
+INNER JOIN (
+    SELECT NVL((
+        SELECT SUM(NbPlaces)
+        FROM ReservationsAvecHorraire R
+        WHERE R.NumT = E.NumT
+        AND E.DATED BETWEEN VD_DATED AND VA_DATEA
+    ), 0) AS "NbPlacesReserv", E.*
+    FROM Etapes E
+) E2 ON L.NumT = E2.NumT
+WHERE E2.DATED BETWEEN L.VD_DATEA AND L.VA_DATEA
+GROUP BY L.NUMT, L."VilleD", L."VilleA"
+ORDER BY L."VilleD", L."VilleA";
+
+-- 5
+
+CREATE OR REPLACE VIEW NbPlaceslibresLiaisons AS
+SELECT (
+    CASE B.CAPACITEB - MAX(E2."NbPlacesReserv")
+        WHEN 0 THEN '0 place libre entre ' || L."VilleD" || ' et ' || L."VilleA" || ' pour le trajet ' || L.NUMT
+        ELSE B.CAPACITEB - MAX(E2."NbPlacesReserv") || ' places au maximum sont libres entre ' || L."VilleD" || ' et ' || L."VilleA" || ' pour le trajet ' || L.NUMT
+    END
+) AS "resultat"
+FROM LIAISONS L
+INNER JOIN (
+    SELECT NVL((
+        SELECT SUM(NbPlaces)
+        FROM ReservationsAvecHorraire R
+        WHERE R.NumT = E.NumT
+        AND E.DATED BETWEEN VD_DATED AND VA_DATEA
+    ), 0) AS "NbPlacesReserv", E.*
+    FROM Etapes E
+) E2 ON L.NumT = E2.NumT
+INNER JOIN Trajets T ON T.NumT = L.NumT
+INNER JOIN Bus B ON B.NumB = T.NumB
+WHERE E2.DATED BETWEEN L.VD_DATEA AND L.VA_DATEA
+GROUP BY L.NUMT, L."VilleD", L."VilleA", B.CAPACITEB
+ORDER BY L."VilleD", L."VilleA";
