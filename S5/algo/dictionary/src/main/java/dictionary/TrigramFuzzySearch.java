@@ -23,7 +23,7 @@ public class TrigramFuzzySearch implements FuzzySearch {
 		buildTrigramsToWords(words);
 
 		Map<String, MutableInteger> nbTrigramsPerWord = new HashMap<>();
-		int max = 0;
+		int maxNbOfTrigInCommon = 0;
 
 		for (String trigram : trigramsFromStr(word)) {
 			Collection<String> words_from_trig = trigramsToWords.get(trigram);
@@ -39,14 +39,15 @@ public class TrigramFuzzySearch implements FuzzySearch {
 				}
 
 				nbTrigrams.set(nbTrigrams.get() + 1);
-				max = Math.max(max, nbTrigrams.get());
+				maxNbOfTrigInCommon = Math.max(maxNbOfTrigInCommon, nbTrigrams.get());
 			}
 		}
 
 		nbWords = Math.min(nbWords, nbTrigramsPerWord.size());
 
-		List<List<String>> wordT = new ArrayList<>(max);
-		for (int i = 0; i < max; ++i) {
+		List<List<String>> wordT = new ArrayList<>(maxNbOfTrigInCommon);
+
+		for (int i = 0; i < maxNbOfTrigInCommon; ++i) {
 			wordT.add(new ArrayList<>());
 		}
 
@@ -55,7 +56,7 @@ public class TrigramFuzzySearch implements FuzzySearch {
 		}
 
 		List<String> words_result = new ArrayList<>(nbWords);
-		int max_found = max - 1;
+		int max_found = maxNbOfTrigInCommon - 1;
 
 		for (int i = 0; i < nbWords; ++i) {
 
