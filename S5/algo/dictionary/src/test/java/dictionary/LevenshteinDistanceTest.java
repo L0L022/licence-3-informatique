@@ -27,4 +27,11 @@ public class LevenshteinDistanceTest {
 
 		assertThat(ld.editDistance(), equalTo(3));
 	}
+
+	@Test
+	public void test() {
+		LevenshteinDistance ld = new LevenshteinDistance("bata", "patta");
+
+		assertThat(ld.editDistance(), equalTo(0));
+	}
 }

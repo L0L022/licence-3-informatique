@@ -1,16 +1,15 @@
 package dictionary;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 public class TrigramFuzzySearch implements FuzzySearch {
 	private Set<String> words;
-	private Map<String, LinkedList<String>> trigramsToWords;
+	private Map<String, Collection<String>> trigramsToWords;
 
 	public TrigramFuzzySearch() {
 	}
@@ -23,38 +22,57 @@ public class TrigramFuzzySearch implements FuzzySearch {
 	public List<String> search(String word, Set<String> words, int nbWords) {
 		buildTrigramsToWords(words);
 
-		HashMap<String, Integer> nbTrigramsPerWord = new HashMap<>();
+		Map<String, MutableInteger> nbTrigramsPerWord = new HashMap<>();
+		int max = 0;
 
 		for (String trigram : trigramsFromStr(word)) {
-			List<String> words_from_trig = trigramsToWords.get(trigram);
+			Collection<String> words_from_trig = trigramsToWords.get(trigram);
 			if (words_from_trig == null) {
 				continue;
 			}
 			for (String w : words_from_trig) {
-				Integer nbTrigrams = nbTrigramsPerWord.get(w);
-				nbTrigramsPerWord.put(w, nbTrigrams == null ? 1 : nbTrigrams + 1);
+				MutableInteger nbTrigrams = nbTrigramsPerWord.get(w);
+
+				if (nbTrigrams == null) {
+					nbTrigrams = new MutableInteger(0);
+					nbTrigramsPerWord.put(w, nbTrigrams);
+				}
+
+				nbTrigrams.set(nbTrigrams.get() + 1);
+				max = Math.max(max, nbTrigrams.get());
 			}
 		}
 
 		nbWords = Math.min(nbWords, nbTrigramsPerWord.size());
 
-		List<WordDistance> wordDistances = new Vector<>(nbTrigramsPerWord.size());
-
-		for (Map.Entry<String, Integer> entry : nbTrigramsPerWord.entrySet()) {
-			wordDistances.add(new WordDistance(entry.getKey(), entry.getValue()));
+		List<List<String>> wordT = new ArrayList<>(max);
+		for (int i = 0; i < max; ++i) {
+			wordT.add(new ArrayList<>());
 		}
 
-		Collections.sort(wordDistances);
-
-		List<String> result = new Vector<>(nbWords);
-
-		for (WordDistance wordDistance : wordDistances.subList(wordDistances.size() - nbWords, wordDistances.size())) {
-			result.add(wordDistance.word.substring(1, wordDistance.word.length() - 1));
-			// System.out.println("trig: " + wordDistance.word + " " +
-			// wordDistance.distance);
+		for (Map.Entry<String, MutableInteger> entry : nbTrigramsPerWord.entrySet()) {
+			wordT.get(entry.getValue().get() - 1).add(entry.getKey());
 		}
 
-		return result;
+		List<String> words_result = new ArrayList<>(nbWords);
+		int max_found = max - 1;
+
+		for (int i = 0; i < nbWords; ++i) {
+
+			String w1 = null;
+			while (w1 == null) {
+				List<String> l = wordT.get(max_found);
+				if (l.isEmpty()) {
+					--max_found;
+					continue;
+				}
+				w1 = l.iterator().next();
+				l.remove(w1);
+			}
+			words_result.add(w1.substring(1, w1.length() - 1));
+		}
+
+		return words_result;
 	}
 
 	private void buildTrigramsToWords(Set<String> words) {
@@ -68,9 +86,9 @@ public class TrigramFuzzySearch implements FuzzySearch {
 		for (String word : words) {
 			word = "<" + word + ">";
 			for (String trigram : trigramsFromStr(word)) {
-				LinkedList<String> associatedWords = trigramsToWords.get(trigram);
+				Collection<String> associatedWords = trigramsToWords.get(trigram);
 				if (associatedWords == null) {
-					associatedWords = new LinkedList<>();
+					associatedWords = new ArrayList<>();
 					trigramsToWords.put(trigram, associatedWords);
 				}
 				associatedWords.add(word);
@@ -82,12 +100,11 @@ public class TrigramFuzzySearch implements FuzzySearch {
 		assert word.length() > 2;
 
 		int nb_trigrams = word.length() - 2;
-		List<String> trigrams = new Vector<>(nb_trigrams);
+		List<String> trigrams = new ArrayList<>(nb_trigrams);
 
 		for (int i = 0; i < nb_trigrams; ++i) {
 			trigrams.add(word.substring(i, i + 3));
 		}
-
 		return trigrams;
 	}
 }

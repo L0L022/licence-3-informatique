@@ -43,7 +43,7 @@ public class Dictionary {
 	public static Dictionary fromFile(String path) throws FileNotFoundException {
 		Scanner s = new Scanner(new BufferedReader(new FileReader(new File(path))));
 
-		Set<String> words = new HashSet<>();
+		Set<String> words = new HashSet<>(424581 * 2);
 
 		while (s.hasNextLine()) {
 			words.add(s.nextLine());
