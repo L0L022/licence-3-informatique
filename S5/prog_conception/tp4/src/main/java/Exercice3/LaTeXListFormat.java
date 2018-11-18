@@ -4,12 +4,12 @@ public class LaTeXListFormat implements ListFormat {
 
 	@Override
 	public String begin() {
-		return "\\begin{itemize}";
+		return "\\begin{itemize}\n";
 	}
 
 	@Override
 	public String end() {
-		return "\\end{itemize}";
+		return "\\end{itemize}\n";
 	}
 
 	@Override
@@ -19,7 +19,7 @@ public class LaTeXListFormat implements ListFormat {
 
 	@Override
 	public String endItem() {
-		return "";
+		return "\n";
 	}
 
 }

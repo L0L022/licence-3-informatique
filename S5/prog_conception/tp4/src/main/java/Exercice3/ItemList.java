@@ -15,10 +15,10 @@ public class ItemList {
 	}
 
 	public void print(ListFormat listFormat) {
-		System.out.println(listFormat.begin());
+		System.out.print(listFormat.begin());
 		for (String item : items) {
-			System.out.println(listFormat.beginItem() + item + listFormat.endItem());
+			System.out.print(listFormat.beginItem() + item + listFormat.endItem());
 		}
-		System.out.println(listFormat.end());
+		System.out.print(listFormat.end());
 	}
 }

@@ -1,5 +1,5 @@
 package Exercice4;
 
-public interface ForumElement {
-
+public interface ForumElement extends Iterable<String> {
+	void print(int nbSpaces);
 }
