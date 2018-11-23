@@ -10,32 +10,44 @@
 enum { SYSC_EXIT, SYSC_PUTI, SYSC_NEW_THREAD };
 
 #define MAX_PROCESS (20) /* nb maximum de processus */
-#define EMPTY       (0)  /* processus non-pr^et    */
-#define READY       (1)  /* processus pr^et        */
+#define EMPTY       (0)  /* processus non prêt      */
+#define READY       (1)  /* processus prêt          */
 
 struct {
-    PSW cpu;             /* mot d’ ́etat du processeur */
-    int state;           /*  ́etat du processus     */
+    PSW cpu;             /* mot d'état du processeur */
+    int state;           /* état du processus     */
 } process[MAX_PROCESS];  /* table des processus   */
 
 int current_process = -1; /* nu du processus courant */
 
-int current_addr = 0;
-int extra_memory = 0;
+int prog_begin_addr = 0;   /* l'adresse du programme en cours d'écriture */
+int prog_extra_memory = 0; /* la mémoire à alouer en plus au programme en cours d'écriture */
+
+/**********************************************************
+** Début du programme
+***********************************************************/
 
 void begin_prog() {
-    begin(current_addr);
-    extra_memory = 0;
+    begin(prog_begin_addr);
+    prog_extra_memory = 0;
 }
 
+/**********************************************************
+** Début du programme avec de la mémoire libre au début
+***********************************************************/
+
 void begin_prog_with_extra_memory(int bytes) {
-    begin(current_addr);
-    extra_memory = bytes;
+    begin(prog_begin_addr);
+    prog_extra_memory = bytes;
     
     for (int i = 0; i < bytes; ++i) {
         nop();
     }
 }
+
+/**********************************************************
+** Fin du programme
+***********************************************************/
 
 PSW end_prog() {
     PSW cpu;
@@ -44,11 +56,11 @@ PSW end_prog() {
     
     /*** valeur initiale du PSW ***/
     memset (&cpu, 0, sizeof(cpu));
-    cpu.PC = extra_memory;
-    cpu.SB = current_addr;
+    cpu.PC = prog_extra_memory;
+    cpu.SB = prog_begin_addr;
     cpu.SS = instructions_count;
     
-    current_addr += instructions_count;
+    prog_begin_addr += instructions_count;
     
     return cpu;
 }
@@ -134,7 +146,7 @@ PSW make_process_thread() {
 }
 
 PSW make_process_thread2() {
-    begin_prog_with_extra_memory(1);
+    begin_prog_with_extra_memory(2);
         
         set(R0, 0); /* adresse compteur partagé */
         set(R1, 1); /* adresse stopeur partagé */
@@ -164,7 +176,7 @@ PSW make_process_thread2() {
         cmp(R4, R2);
         if_gt(20);
         
-        /*** met compteur partagé à zéro ***/
+        /*** met compteur partagé à zéro pour terminer le thread père ***/
         set(R2, 0);
         store(R2, R1, 0);
         
@@ -174,7 +186,7 @@ PSW make_process_thread2() {
         label(10);
         set(R3, 0);
         label(15);
-            load(R2, R0, 0); /* charge le compteur partagé */
+            load(R2, R0, 0); /* récupère le compteur partagé */
             sysc(R2, 0, SYSC_PUTI); /* affiche le compteur partagé */
             
         /*** boucle tant que le stopeur est sup à zéro ***/
@@ -186,13 +198,20 @@ PSW make_process_thread2() {
     return end_prog();
 }
 
+/**********************************************************
+** Ajoute un processus
+***********************************************************/
+
 int add_process(PSW m) {
     int i = 0;
+    
     while (process[i].state != EMPTY) {
         ++i;
     }
+    
     process[i].cpu = m;
     process[i].state = READY;
+    
     return i;
 }
 
@@ -207,17 +226,14 @@ PSW system_init(void) {
         process[i].state = EMPTY;
     }
     
-    //current_process = add_process(make_process_ex2());
-    //add_process(make_process_ex2());
     current_process = add_process(make_process_thread2());
-    add_process(make_process_thread());
-    add_process(make_process_inst());
-    add_process(make_process_sysc_exit());
-    add_process(make_process_ex2());
-    add_process(make_process_thread());
-    add_process(make_process_thread2());
-    add_process(make_process_segv());
-    
+//     add_process(make_process_thread());
+//     add_process(make_process_inst());
+//     add_process(make_process_sysc_exit());
+//     add_process(make_process_ex2());
+//     add_process(make_process_thread());
+//     add_process(make_process_thread2());
+//     add_process(make_process_segv());
     
     return process[current_process].cpu;
 }
@@ -230,7 +246,7 @@ void print_interruption(WORD interruption) {
 
 void sysc_exit() {
     process[current_process].state = EMPTY;
-    printf("exit\n");
+    printf("process %d exit\n", current_process);
     
     for (int i = 0; i < MAX_PROCESS; ++i) {
         if (process[i].state != EMPTY) {
@@ -291,7 +307,6 @@ PSW process_sysc(PSW m) {
             printf("Unknown system call : %d\n", m.RI.ARG);
             exit(EXIT_FAILURE);
     }
-    
     return m;
 }
 
@@ -305,13 +320,11 @@ PSW process_interrupt(PSW m) {
     printf("\n______ P%d ______\n", current_process);
     
     //dump_cpu(m);
-    
     //print_interruption(m.IN);
     
     switch (m.IN) {
         case INT_SEGV:
-            printf("segv\n");
-            //exit(EXIT_FAILURE);
+            printf("SEGV\n");
             sysc_exit();
             m = scheduler(m);
             break;
@@ -320,8 +333,7 @@ PSW process_interrupt(PSW m) {
             m = scheduler(m);
             break;
         case INT_INST:
-            //exit(EXIT_FAILURE);
-            printf("inst\n");
+            printf("INST\n");
             sysc_exit();
             m = scheduler(m);
             break;
