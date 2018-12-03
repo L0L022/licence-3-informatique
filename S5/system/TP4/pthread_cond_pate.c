@@ -27,17 +27,19 @@ void* painter (void* _unused) {
 	int i;
     int my_number;
 
-    /* Chaque peintre prend un numéro et une couleur. */
+    /*On pose les fourchettes */
     pthread_mutex_lock(&mutex);
     my_number = (nbPhilo++);
     pthread_mutex_unlock(&mutex);
 
-   	int f_gauche = (my_number - 1) % NB_PHILO;
-	int f_droite = my_number;
+   	int f_gauche = my_number;
+	int f_droite = (my_number + 1) % NB_PHILO;
+	
+	printf("f%d = %d %d\n", my_number, f_gauche, f_droite);
 	
 	sleep(1);
 
-    /* il y a trois zones à peindre */
+    /* Chaque philosophe mange 3 bouchées */
     for(i=0; (i < 3); i++) {
     
 
@@ -51,7 +53,7 @@ void* painter (void* _unused) {
         pthread_mutex_lock(&mutex);
         while (fourchettes[f_gauche] != LIBRE || fourchettes[f_droite] != LIBRE) {
 					printf("philo %d cherche la fourchette !\n", my_number);
-            /* je m'endors car la condition est fausse */
+            /* je m'endors car la condition est fausse (une des fourchettes est prise)*/
             pthread_cond_wait(&condition, &mutex);
         }
 
