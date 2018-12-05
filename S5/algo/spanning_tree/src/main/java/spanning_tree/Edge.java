@@ -23,6 +23,20 @@ public class Edge implements Comparable<Edge> {
 		return 1;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		}
+		if (!(o instanceof Edge)) {
+			return false;
+		}
+
+		Edge edg = (Edge) o;
+
+		return (v1 == edg.v1 && v2 == edg.v2) || (v1 == edg.v2 && v2 == edg.v1);
+	}
+
 	public int oppositeExtremity(int vertex) {
 		if (v1 != vertex && v2 != vertex) {
 			throw new RuntimeException("Le sommet n'appartient pas au côté.");

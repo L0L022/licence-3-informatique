@@ -16,13 +16,18 @@ public class Main {
 		// TOOO : modifier l'algorithme utiliser ici.
 
 		// Non-random BFS
-		ArrayList<Arc> randomArcTree = BreadthFirstSearch.generateTree(graph, 0);
-		randomTree = new ArrayList<>();
-		for (Arc a : randomArcTree) {
-			randomTree.add(a.support);
-		}
+		// ArrayList<Arc> randomArcTree = BreadthFirstSearch.generateTree(graph, 0);
+		// randomTree = new ArrayList<>();
+		// for (Arc a : randomArcTree) {
+		// randomTree.add(a.support);
+		// }
+		// System.out.println(Graph.exportDotArcs(randomArcTree));
 
-//		System.out.println(Graph.exportDotArcs(randomArcTree));
+		// randomTree = Kruskal.generateTree(graph);
+		// randomTree = MnimumWeightSpanningTreeUsingRandomWeight.generateTree(graph);
+		randomTree = MnimumWeightSpanningTreeUsingRandomEdge.generateTree(graph);
+
+		System.out.println(Graph.exportDotEdges(randomTree));
 
 		return randomTree;
 	}
@@ -31,16 +36,16 @@ public class Main {
 
 		Grid grid = null;
 		grid = new Grid(1920 / 11, 1080 / 11);
-		// grid = new Grid(3, 3);
+		// grid = new Grid(5, 5);
 		Graph graph = grid.graph;
 
-//		System.out.println(Graph.exportDotEdges(graph.adjacency));
+		// System.out.println(Graph.exportDotEdges(graph.adjacency));
 
-//		Graph graph = new Complete(400).graph;
+		// Graph graph = new Complete(400).graph;
 
-//		Graph graph = new ErdosRenyi(1_000, 100).graph;
+		// Graph graph = new ErdosRenyi(1_000, 100).graph;
 
-//		Graph graph = new Lollipop(1_000).graph;
+		// Graph graph = new Lollipop(1_000).graph;
 
 		int nbrOfSamples = 10;
 		int diameterSum = 0;
@@ -57,7 +62,7 @@ public class Main {
 			randomTree = genTree(graph);
 
 			rooted = new RootedTree(randomTree, 0);
-//			rooted.printStats();
+			// rooted.printStats();
 			diameterSum = diameterSum + rooted.getDiameter();
 			eccentricitySum = eccentricitySum + rooted.getAverageEccentricity();
 			wienerSum = wienerSum + rooted.getWienerIndex();
@@ -87,8 +92,8 @@ public class Main {
 		final Labyrinth laby = new Labyrinth(grid, rooted);
 
 		laby.setStyleBalanced();
-//		laby.setShapeBigNodes();
-//		laby.setShapeSmallAndFull();
+		// laby.setShapeBigNodes();
+		// laby.setShapeSmallAndFull();
 		laby.setShapeSmoothSmallNodes();
 
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -104,11 +109,11 @@ public class Main {
 		window.setVisible(true);
 
 		// Pour générer un fichier image.
-//		try {
-//			laby.saveImage("resources/random.png");
-//		} catch (IOException e1) {
-//			e1.printStackTrace();
-//		}
+		// try {
+		// laby.saveImage("resources/random.png");
+		// } catch (IOException e1) {
+		// e1.printStackTrace();
+		// }
 
 	}
 }

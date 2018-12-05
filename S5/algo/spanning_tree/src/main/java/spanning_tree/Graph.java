@@ -1,15 +1,45 @@
 package spanning_tree;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class Graph implements Iterable<Edge> {
 	// classe de graphe non orientés permettant de manipuler
 	// en même temps des arcs (orientés)
 	// pour pouvoir stocker un arbre couvrant, en plus du graphe
+
+	private class IteratorGraph implements Iterator<Edge> {
+
+		private Set<Edge> edges;
+		private Iterator<Edge> iterator;
+
+		public IteratorGraph() {
+			edges = new HashSet<>();
+			for (List<Edge> edges_graph : adjacency) {
+				for (Edge edge : edges_graph) {
+					edges.add(edge);
+				}
+			}
+			iterator = edges.iterator();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return iterator.hasNext();
+		}
+
+		@Override
+		public Edge next() {
+			return iterator.next();
+		}
+
+	}
 
 	int order;
 	int edgeCardinality;
@@ -33,6 +63,7 @@ public class Graph implements Iterable<Edge> {
 
 	public Graph(int upperBound) {
 		adjacency = makeList(upperBound);
+		order = upperBound;
 	}
 
 	public void addVertex(int indexVertex) {
@@ -54,8 +85,7 @@ public class Graph implements Iterable<Edge> {
 
 	@Override
 	public Iterator<Edge> iterator() {
-		// TODO Auto-generated method stub
-		return null;
+		return new IteratorGraph();
 	}
 
 	public List<Arc> outNeighbours(int sommet) {
@@ -75,6 +105,18 @@ public class Graph implements Iterable<Edge> {
 		return sb.toString();
 	}
 
+	static String exportDotEdges(Collection<Edge> edges) {
+		DecimalFormat df = new DecimalFormat("#0.0#");
+		StringBuilder sb = new StringBuilder();
+		sb.append("digraph g {\n\tedge [\n\t\tarrowhead=\"none\"\n\t];\n");
+		for (Edge edge : edges) {
+			sb.append("\t" + String.valueOf(edge.v1) + " -> " + String.valueOf(edge.v2) + " [label=\""
+					+ df.format(edge.weight) + "\"]\n");
+		}
+		sb.append("}\n");
+		return sb.toString();
+	}
+
 	static String exportDotArcs(Collection<Arc> arcs) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("digraph G {\n");
@@ -84,4 +126,5 @@ public class Graph implements Iterable<Edge> {
 		sb.append("}\n");
 		return sb.toString();
 	}
+
 }
