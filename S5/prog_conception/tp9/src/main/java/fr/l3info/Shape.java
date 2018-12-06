@@ -8,4 +8,6 @@ public interface Shape {
 	boolean contains(double x, double y);
 
 	void translate(double dx, double dy);
+
+	<T> T accept(ShapeVisitor<T> visitor);
 }

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
@@ -55,7 +54,7 @@ public class Drawer extends Canvas {
 			return;
 		}
 		try {
-			ShapeWriter.write(file, shapes);
+			(new ShapeWriter()).write(file, shapes);
 		} catch (IOException e) {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("Error Dialog");
@@ -73,7 +72,7 @@ public class Drawer extends Canvas {
 			return;
 		}
 		try {
-			shapes = ShapeReader.read(file, Collectors.toList());
+			shapes = (new ShapeReader()).read(file);
 			repaint();
 		} catch (IOException e) {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);

@@ -46,6 +46,12 @@ public class DrawerContext {
 		case "m":
 			currentState = new MoveState0();
 			break;
+		case "l":
+			drawer.load();
+			break;
+		case "w":
+			drawer.write();
+			break;
 		}
 	}
 

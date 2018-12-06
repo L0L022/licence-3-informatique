@@ -28,4 +28,9 @@ public class Circle implements Shape {
 		y += dy;
 	}
 
+	@Override
+	public <T> T accept(ShapeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
+
 }
