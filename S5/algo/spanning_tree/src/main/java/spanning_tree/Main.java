@@ -1,52 +1,172 @@
 package spanning_tree;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.List;
 
 import javax.swing.JFrame;
 
 public class Main {
+	private static boolean useGridGraph = true;
+	private static boolean useCompleteGraph = true;
+	private static boolean useErdosRenyiGraph = true;
+	private static boolean useLollipopGraph = true;
 
-	@SuppressWarnings("unused")
-	private final static Random gen = new Random();
+	private static boolean showGridGraph = true;
 
-	public static ArrayList<Edge> genTree(Graph graph) {
-		ArrayList<Edge> randomTree;
+	private static boolean useBFS = true;
+	private static boolean useKruskal = true;
+	private static boolean useRandomWeight = true;
+	private static boolean useRandomEdge = true;
+	private static boolean useAldousBroder = true;
+	private static boolean useWilson = true;
 
-		// TOOO : modifier l'algorithme utiliser ici.
+	private static List<MinimumWeightSpanningTreeGenerator> treeGenerators;
+	private static MinimumWeightSpanningTreeGenerator currentTreeGenerator;
 
-		// Non-random BFS
-		// ArrayList<Arc> randomArcTree = BreadthFirstSearch.generateTree(graph, 0);
-		// randomTree = new ArrayList<>();
-		// for (Arc a : randomArcTree) {
-		// randomTree.add(a.support);
-		// }
-		// System.out.println(Graph.exportDotArcs(randomArcTree));
+	private static Writer output = null;
 
-		// randomTree = Kruskal.generateTree(graph);
-		// randomTree = MnimumWeightSpanningTreeUsingRandomWeight.generateTree(graph);
-		randomTree = MnimumWeightSpanningTreeUsingRandomEdge.generateTree(graph);
+	private static List<List<Stats>> treeGeneratorsStats;
 
-		System.out.println(Graph.exportDotEdges(randomTree));
+	public static void main(String argv[]) {
+		initTreeGenerators();
+		treeGeneratorsStats = new ArrayList<>();
 
-		return randomTree;
+		for (MinimumWeightSpanningTreeGenerator treeGenerator : treeGenerators) {
+			currentTreeGenerator = treeGenerator;
+
+			System.out.println(currentTreeGenerator.name());
+			treeGeneratorsStats.add(showStats());
+		}
+
+		int i = 0;
+		for (MinimumWeightSpanningTreeGenerator treeGenerator : treeGenerators) {
+			currentTreeGenerator = treeGenerator;
+
+			try {
+				output = new BufferedWriter(
+						new OutputStreamWriter(new FileOutputStream(currentTreeGenerator.name() + ".csv"), "utf-8"));
+
+				output.write("Stats,");
+				if (useGridGraph) {
+					output.write("Grid,");
+				}
+				if (useCompleteGraph) {
+					output.write("Complete graph,");
+				}
+				if (useErdosRenyiGraph) {
+					output.write("Erdos-Renyi graph,");
+				}
+				if (useLollipopGraph) {
+					output.write("Lollipop graph,");
+				}
+				output.write("\n");
+
+				String[] statsName = { "Average eccentricity", "Average wiener index", "Average diameter",
+						"Average number of leaves", "Average number of degree 2 vertices",
+						"Average computation time(ms)" };
+
+				for (int stat = 0; stat < statsName.length; ++stat) {
+					output.write(statsName[stat] + ",");
+
+					for (Stats stats : treeGeneratorsStats.get(i)) {
+						switch (stat) {
+						case 0:
+							output.write(Double.toString(stats.averageEccentricity) + ",");
+							break;
+						case 1:
+							output.write(Double.toString(stats.averageWienerIndex) + ",");
+							break;
+						case 2:
+							output.write(Double.toString(stats.averageDiameter) + ",");
+							break;
+						case 3:
+							output.write(Double.toString(stats.averageNumberOfLeaves) + ",");
+							break;
+						case 4:
+							output.write(Double.toString(stats.averageNumberOfDegreeTwoVertices) + ",");
+							break;
+						case 5:
+							output.write(Double.toString(stats.averageComputationTimeMilliSec) + ",");
+							break;
+						}
+					}
+
+					output.write("\n");
+				}
+
+			} catch (IOException ex) {
+				// Report
+			} finally {
+				try {
+					output.close();
+				} catch (Exception ex) {
+					/* ignore */}
+			}
+			++i;
+		}
 	}
 
-	public static void main(String argv[]) throws InterruptedException {
+	private static void initTreeGenerators() {
+		treeGenerators = new ArrayList<>();
 
-		Grid grid = null;
-		grid = new Grid(1920 / 11, 1080 / 11);
-		// grid = new Grid(5, 5);
-		Graph graph = grid.graph;
+		if (useBFS) {
+			treeGenerators.add(new BreadthFirstSearch());
+		}
 
-		// System.out.println(Graph.exportDotEdges(graph.adjacency));
+		if (useKruskal) {
+			treeGenerators.add(new Kruskal());
+		}
 
-		// Graph graph = new Complete(400).graph;
+		if (useRandomWeight) {
+			treeGenerators.add(new RandomWeight());
+		}
 
-		// Graph graph = new ErdosRenyi(1_000, 100).graph;
+		if (useRandomEdge) {
+			treeGenerators.add(new RandomEdge());
+		}
 
-		// Graph graph = new Lollipop(1_000).graph;
+		if (useAldousBroder) {
+			treeGenerators.add(new AldousBroder());
+		}
 
+		if (useWilson) {
+			treeGenerators.add(new Wilson());
+		}
+	}
+
+	private static List<Stats> showStats() {
+		List<Stats> stats = new ArrayList<>();
+
+		if (useGridGraph) {
+			Grid grid = new Grid(1920 / 11, 1080 / 11);
+			System.out.println("Grid height: " + grid.height + " width: " + grid.width);
+			stats.add(showStats(grid.graph, grid));
+		}
+
+		if (useCompleteGraph) {
+			System.out.println("Complete graph");
+			stats.add(showStats(new Complete(400).graph, null));
+		}
+
+		if (useErdosRenyiGraph) {
+			System.out.println("Erdos-Renyi graph");
+			stats.add(showStats(new ErdosRenyi(1_000, 100).graph, null));
+		}
+
+		if (useLollipopGraph) {
+			System.out.println("Lollipop graph");
+			stats.add(showStats(new Lollipop(1_000).graph, null));
+		}
+
+		return stats;
+	}
+
+	private static Stats showStats(Graph graph, Grid grid) {
 		int nbrOfSamples = 10;
 		int diameterSum = 0;
 		double eccentricitySum = 0;
@@ -54,12 +174,12 @@ public class Main {
 		int degreesSum[] = { 0, 0, 0, 0, 0 };
 		int degrees[];
 
-		ArrayList<Edge> randomTree = null;
+		List<Edge> randomTree = null;
 		RootedTree rooted = null;
 
 		long startingTime = System.nanoTime();
 		for (int i = 0; i < nbrOfSamples; i++) {
-			randomTree = genTree(graph);
+			randomTree = currentTreeGenerator.generateTree(graph);
 
 			rooted = new RootedTree(randomTree, 0);
 			// rooted.printStats();
@@ -82,12 +202,27 @@ public class Main {
 		System.out.println("Average number of degree 2 vertices: " + (degreesSum[2] / nbrOfSamples));
 		System.out.println("Average computation time: " + delay / (nbrOfSamples * 1_000_000) + "ms");
 
-		if (grid != null) {
-			showGrid(grid, rooted, randomTree);
+		Stats stats = new Stats();
+		stats.averageEccentricity = eccentricitySum / nbrOfSamples;
+		stats.averageWienerIndex = wienerSum / nbrOfSamples;
+		stats.averageDiameter = diameterSum / nbrOfSamples;
+		stats.averageNumberOfLeaves = degreesSum[1] / nbrOfSamples;
+		stats.averageNumberOfDegreeTwoVertices = degreesSum[2] / nbrOfSamples;
+		stats.averageComputationTimeMilliSec = delay / (nbrOfSamples * 1_000_000);
+
+		if (grid != null && showGridGraph) {
+			try {
+				showGrid(grid, rooted, randomTree);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+
+		return stats;
 	}
 
-	private static void showGrid(Grid grid, RootedTree rooted, ArrayList<Edge> randomTree) throws InterruptedException {
+	private static void showGrid(Grid grid, RootedTree rooted, List<Edge> randomTree) throws InterruptedException {
 		JFrame window = new JFrame("solution");
 		final Labyrinth laby = new Labyrinth(grid, rooted);
 

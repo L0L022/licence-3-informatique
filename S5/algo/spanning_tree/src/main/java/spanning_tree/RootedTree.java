@@ -3,6 +3,7 @@ package spanning_tree;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class RootedTree {
@@ -300,7 +301,7 @@ public class RootedTree {
 		this.root = nodes[root];
 	}
 
-	public RootedTree(ArrayList<Edge> edges, int root) {
+	public RootedTree(List<Edge> edges, int root) {
 		order = edges.size() + 1;
 		Graph graph = new Graph(order);
 		for (Edge e : edges) {
