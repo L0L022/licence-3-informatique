@@ -16,7 +16,7 @@ public class Main {
 	private static boolean useErdosRenyiGraph = true;
 	private static boolean useLollipopGraph = true;
 
-	private static boolean showGridGraph = false;
+	private static boolean showGridGraph = true;
 
 	private static boolean useBFS = true;
 	private static boolean useKruskal = true;
@@ -33,14 +33,6 @@ public class Main {
 	private static List<List<Stats>> treeGeneratorsStats;
 
 	public static void main(String argv[]) {
-
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 		initTreeGenerators();
 		treeGeneratorsStats = new ArrayList<>();
 

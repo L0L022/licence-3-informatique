@@ -1,9 +1,8 @@
 package spanning_tree;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.BitSet;
 import java.util.List;
-import java.util.Set;
 
 public class Wilson implements MinimumWeightSpanningTreeGenerator {
 
@@ -17,22 +16,24 @@ public class Wilson implements MinimumWeightSpanningTreeGenerator {
 		List<Edge> edges = new ArrayList<>();
 
 		int v = graph.maxDegVertex();
-		Set<Integer> visitedVertices = new HashSet<>(graph.order);
-		visitedVertices.add(v);
+
+		BitSet isVertexVisited = new BitSet(graph.order);
+		isVertexVisited.set(v, true);
+
 		Edge[] chemin = new Edge[graph.adjacency.size()];
 
-		while (visitedVertices.size() != graph.order) {
+		while (edges.size() != graph.order - 1) {
 			int u = -1;
 			do {
 				u = graph.randomVertex();
-			} while (visitedVertices.contains(u));
+			} while (isVertexVisited.get(u));
 
 			int begin = u;
 
 			chemin[u] = graph.randomEdge(u);
 			int w = chemin[u].oppositeExtremity(u);
 
-			while (!visitedVertices.contains(w)) {
+			while (!isVertexVisited.get(w)) {
 				u = w;
 
 				chemin[u] = graph.randomEdge(u);
@@ -41,7 +42,7 @@ public class Wilson implements MinimumWeightSpanningTreeGenerator {
 
 			v = begin;
 			while (v != w) {
-				visitedVertices.add(v);
+				isVertexVisited.set(v, true);
 				edges.add(chemin[v]);
 				v = chemin[v].oppositeExtremity(v);
 			}

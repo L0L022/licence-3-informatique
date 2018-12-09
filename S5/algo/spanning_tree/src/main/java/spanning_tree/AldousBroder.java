@@ -1,9 +1,8 @@
 package spanning_tree;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.BitSet;
 import java.util.List;
-import java.util.Set;
 
 public class AldousBroder implements MinimumWeightSpanningTreeGenerator {
 
@@ -12,15 +11,15 @@ public class AldousBroder implements MinimumWeightSpanningTreeGenerator {
 		List<Edge> edges = new ArrayList<>();
 
 		int actualVertex = graph.randomVertex();
-		Set<Integer> visitedVertices = new HashSet<>(graph.order);
-		visitedVertices.add(actualVertex);
+		BitSet isVertexVisited = new BitSet(graph.order);
+		isVertexVisited.set(actualVertex, true);
 
-		while (visitedVertices.size() != graph.order) {
+		while (edges.size() != graph.order - 1) {
 			Edge edge = graph.randomEdge(actualVertex);
 			int oppositeVertex = edge.oppositeExtremity(actualVertex);
-			if (!visitedVertices.contains(oppositeVertex)) {
+			if (!isVertexVisited.get(oppositeVertex)) {
 				edges.add(edge);
-				visitedVertices.add(oppositeVertex);
+				isVertexVisited.set(oppositeVertex, true);
 			}
 			actualVertex = oppositeVertex;
 		}
