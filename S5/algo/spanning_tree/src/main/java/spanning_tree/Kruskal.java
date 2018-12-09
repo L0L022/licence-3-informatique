@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Kruskal {
-	public static ArrayList<Edge> generateTree(Graph graph) {
-		ArrayList<Edge> result = new ArrayList<>();
+public class Kruskal implements MinimumWeightSpanningTreeGenerator {
+	@Override
+	public List<Edge> generateTree(Graph graph) {
+		List<Edge> result = new ArrayList<>();
 
 		UnionFind unionFind = new UnionFind(graph.adjacency.size());
 
@@ -25,5 +26,10 @@ public class Kruskal {
 		}
 
 		return result;
+	}
+
+	@Override
+	public String name() {
+		return "Kruskal";
 	}
 }

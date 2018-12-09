@@ -3,7 +3,7 @@ package spanning_tree;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BreadthFirstSearch {
+public class BreadthFirstSearch implements MinimumWeightSpanningTreeGenerator {
 
 	public static ArrayList<Arc> generateTree(Graph graph, int vertex, List<Boolean> visited_vertex) {
 		ArrayList<Arc> arcs = new ArrayList<>();
@@ -37,6 +37,24 @@ public class BreadthFirstSearch {
 			visited_vertex.add(false);
 		}
 		return generateTree(graph, vertex, visited_vertex);
+	}
+
+	@Override
+	public List<Edge> generateTree(Graph graph) {
+		ArrayList<Edge> randomTree;
+
+		ArrayList<Arc> randomArcTree = BreadthFirstSearch.generateTree(graph, 0);
+		randomTree = new ArrayList<>();
+		for (Arc a : randomArcTree) {
+			randomTree.add(a.support);
+		}
+
+		return randomTree;
+	}
+
+	@Override
+	public String name() {
+		return "BreadthFirstSearch";
 	}
 
 }

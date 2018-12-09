@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 public class Graph implements Iterable<Edge> {
@@ -41,46 +41,54 @@ public class Graph implements Iterable<Edge> {
 
 	}
 
-	int order;
-	int edgeCardinality;
+	private static Random rand = new Random();
 
-	ArrayList<LinkedList<Edge>> adjacency;
-	ArrayList<LinkedList<Arc>> inAdjacency;
-	ArrayList<LinkedList<Arc>> outAdjacency;
+	int order;
+	// int edgeCardinality;
+
+	List<? extends List<Edge>> adjacency;
+//	ArrayList<LinkedList<Arc>> inAdjacency;
+//	ArrayList<LinkedList<Arc>> outAdjacency;
 
 	public boolean isVertex(int index) {
-		return false;
-		// à remplir
+		return adjacency.get(index).size() > 0;
 	}
 
-	public <T> ArrayList<LinkedList<T>> makeList(int size) {
-		ArrayList<LinkedList<T>> res = new ArrayList<>(size);
+	public <T> List<? extends List<T>> makeList(int size) {
+		List<ArrayList<T>> res = new ArrayList<>(size);
 		for (int i = 0; i <= size; i++) {
-			res.add(new LinkedList<>());
+			res.add(new ArrayList<T>());
 		}
 		return res;
 	}
 
 	public Graph(int upperBound) {
 		adjacency = makeList(upperBound);
-		order = upperBound;
 	}
-
-	public void addVertex(int indexVertex) {
-		// à remplir
-	}
-
-	public void ensureVertex(int indexVertex) {
-		// à remplir
-	}
-
-	public void addArc(Arc arc) {
-		// à remplir
-	}
+//
+//	public void addVertex(int indexVertex) {
+//		// à remplir
+//	}
+//
+//	public void ensureVertex(int indexVertex) {
+//		// à remplir
+//	}
+//
+//	public void addArc(Arc arc) {
+//		// à remplir
+//	}
 
 	public void addEdge(Edge e) {
 		adjacency.get(e.v1).add(e);
 		adjacency.get(e.v2).add(e);
+
+		if (adjacency.get(e.v1).size() == 1) {
+			++order;
+		}
+
+		if (adjacency.get(e.v2).size() == 1) {
+			++order;
+		}
 	}
 
 	@Override
@@ -91,6 +99,29 @@ public class Graph implements Iterable<Edge> {
 	public List<Arc> outNeighbours(int sommet) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public int randomVertex() {
+		int v;
+		do {
+			v = rand.nextInt(adjacency.size());
+		} while (!isVertex(v));
+		return v;
+	}
+
+	public Edge randomEdge(int vertex) {
+		List<Edge> adjacencyEdges = adjacency.get(vertex);
+		return adjacencyEdges.get(rand.nextInt(adjacencyEdges.size()));
+	}
+
+	public int maxDegVertex() {
+		int vertex = 0;
+		for (int i = 1; i < adjacency.size(); ++i) {
+			if (adjacency.get(vertex).size() < adjacency.get(i).size()) {
+				vertex = i;
+			}
+		}
+		return vertex;
 	}
 
 	static String exportDotEdges(List<? extends Collection<Edge>> graph) {
