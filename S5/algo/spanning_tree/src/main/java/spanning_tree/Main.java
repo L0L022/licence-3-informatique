@@ -16,7 +16,7 @@ public class Main {
 	private static boolean useErdosRenyiGraph = true;
 	private static boolean useLollipopGraph = true;
 
-	private static boolean showGridGraph = true;
+	private static boolean showGridGraph = true; // empèche exportCSV
 
 	private static boolean useBFS = true;
 	private static boolean useKruskal = true;
@@ -43,72 +43,7 @@ public class Main {
 			treeGeneratorsStats.add(showStats());
 		}
 
-		int i = 0;
-		for (MinimumWeightSpanningTreeGenerator treeGenerator : treeGenerators) {
-			currentTreeGenerator = treeGenerator;
-
-			try {
-				output = new BufferedWriter(
-						new OutputStreamWriter(new FileOutputStream(currentTreeGenerator.name() + ".csv"), "utf-8"));
-
-				output.write("Stats,");
-				if (useGridGraph) {
-					output.write("Grid,");
-				}
-				if (useCompleteGraph) {
-					output.write("Complete graph,");
-				}
-				if (useErdosRenyiGraph) {
-					output.write("Erdos-Renyi graph,");
-				}
-				if (useLollipopGraph) {
-					output.write("Lollipop graph,");
-				}
-				output.write("\n");
-
-				String[] statsName = { "Average eccentricity", "Average wiener index", "Average diameter",
-						"Average number of leaves", "Average number of degree 2 vertices",
-						"Average computation time(ms)" };
-
-				for (int stat = 0; stat < statsName.length; ++stat) {
-					output.write(statsName[stat] + ",");
-
-					for (Stats stats : treeGeneratorsStats.get(i)) {
-						switch (stat) {
-						case 0:
-							output.write(Double.toString(stats.averageEccentricity) + ",");
-							break;
-						case 1:
-							output.write(Double.toString(stats.averageWienerIndex) + ",");
-							break;
-						case 2:
-							output.write(Double.toString(stats.averageDiameter) + ",");
-							break;
-						case 3:
-							output.write(Double.toString(stats.averageNumberOfLeaves) + ",");
-							break;
-						case 4:
-							output.write(Double.toString(stats.averageNumberOfDegreeTwoVertices) + ",");
-							break;
-						case 5:
-							output.write(Double.toString(stats.averageComputationTimeMilliSec) + ",");
-							break;
-						}
-					}
-
-					output.write("\n");
-				}
-
-			} catch (IOException ex) {
-				// Report
-			} finally {
-				try {
-					output.close();
-				} catch (Exception ex) {
-					/* ignore */}
-			}
-			++i;
-		}
+		exportCSV();
 	}
 
 	private static void initTreeGenerators() {
@@ -173,6 +108,10 @@ public class Main {
 		long wienerSum = 0;
 		int degreesSum[] = { 0, 0, 0, 0, 0 };
 		int degrees[];
+		long radiusSum = 0;
+		long centroidSum = 0;
+		long subTreeSizeSum = 0;
+		long depthSum = 0;
 
 		List<Edge> randomTree = null;
 		RootedTree rooted = null;
@@ -191,16 +130,13 @@ public class Main {
 			for (int j = 1; j < 5; j++) {
 				degreesSum[j] = degreesSum[j] + degrees[j];
 			}
+
+			radiusSum += rooted.getRadius();
+			centroidSum += rooted.getCentroid();
+			subTreeSizeSum += rooted.getSubtreeSize(1);
+			depthSum += rooted.getDepth(1);
 		}
 		long delay = System.nanoTime() - startingTime;
-
-		System.out.println("On " + nbrOfSamples + " samples:");
-		System.out.println("Average eccentricity: " + (eccentricitySum / nbrOfSamples));
-		System.out.println("Average wiener index: " + (wienerSum / nbrOfSamples));
-		System.out.println("Average diameter: " + (diameterSum / nbrOfSamples));
-		System.out.println("Average number of leaves: " + (degreesSum[1] / nbrOfSamples));
-		System.out.println("Average number of degree 2 vertices: " + (degreesSum[2] / nbrOfSamples));
-		System.out.println("Average computation time: " + delay / (nbrOfSamples * 1_000_000) + "ms");
 
 		Stats stats = new Stats();
 		stats.averageEccentricity = eccentricitySum / nbrOfSamples;
@@ -209,6 +145,22 @@ public class Main {
 		stats.averageNumberOfLeaves = degreesSum[1] / nbrOfSamples;
 		stats.averageNumberOfDegreeTwoVertices = degreesSum[2] / nbrOfSamples;
 		stats.averageComputationTimeMilliSec = delay / (nbrOfSamples * 1_000_000);
+		stats.averageRadius = radiusSum / nbrOfSamples;
+		stats.averageCentroid = centroidSum / nbrOfSamples;
+		stats.averageSubTreeSize = subTreeSizeSum / nbrOfSamples;
+		stats.averageDepth = depthSum / nbrOfSamples;
+
+		System.out.println("On " + nbrOfSamples + " samples:");
+		System.out.println("Average eccentricity: " + stats.averageEccentricity);
+		System.out.println("Average wiener index: " + stats.averageWienerIndex);
+		System.out.println("Average diameter: " + stats.averageDiameter);
+		System.out.println("Average number of leaves: " + stats.averageNumberOfLeaves);
+		System.out.println("Average number of degree 2 vertices: " + stats.averageNumberOfDegreeTwoVertices);
+		System.out.println("Average computation time: " + stats.averageComputationTimeMilliSec + "ms");
+		System.out.println("Average radius: " + stats.averageRadius);
+		System.out.println("Average centroid: " + stats.averageCentroid);
+		System.out.println("Average sub tree size: " + stats.averageSubTreeSize);
+		System.out.println("Average depth: " + stats.averageDepth);
 
 		if (grid != null && showGridGraph) {
 			try {
@@ -223,7 +175,7 @@ public class Main {
 	}
 
 	private static void showGrid(Grid grid, RootedTree rooted, List<Edge> randomTree) throws InterruptedException {
-		JFrame window = new JFrame("solution");
+		JFrame window = new JFrame(currentTreeGenerator.name());
 		final Labyrinth laby = new Labyrinth(grid, rooted);
 
 		laby.setStyleBalanced();
@@ -250,5 +202,87 @@ public class Main {
 		// e1.printStackTrace();
 		// }
 
+	}
+
+	private static void exportCSV() {
+		int i = 0;
+		for (MinimumWeightSpanningTreeGenerator treeGenerator : treeGenerators) {
+			currentTreeGenerator = treeGenerator;
+
+			try {
+				output = new BufferedWriter(
+						new OutputStreamWriter(new FileOutputStream(currentTreeGenerator.name() + ".csv"), "utf-8"));
+				System.out.println("____________________________écriture");
+				output.write("Stats,");
+				if (useGridGraph) {
+					output.write("Grid,");
+				}
+				if (useCompleteGraph) {
+					output.write("Complete graph,");
+				}
+				if (useErdosRenyiGraph) {
+					output.write("Erdos-Renyi graph,");
+				}
+				if (useLollipopGraph) {
+					output.write("Lollipop graph,");
+				}
+				output.write("\n");
+
+				String[] statsName = { "Average eccentricity", "Average wiener index", "Average diameter",
+						"Average number of leaves", "Average number of degree 2 vertices",
+						"Average computation time(ms)", "Average radius", "Average centroid", "Average sub tree size",
+						"Average depth" };
+
+				for (int stat = 0; stat < statsName.length; ++stat) {
+					output.write(statsName[stat] + ",");
+
+					for (Stats stats : treeGeneratorsStats.get(i)) {
+						switch (stat) {
+						case 0:
+							output.write(Double.toString(stats.averageEccentricity) + ",");
+							break;
+						case 1:
+							output.write(Double.toString(stats.averageWienerIndex) + ",");
+							break;
+						case 2:
+							output.write(Double.toString(stats.averageDiameter) + ",");
+							break;
+						case 3:
+							output.write(Double.toString(stats.averageNumberOfLeaves) + ",");
+							break;
+						case 4:
+							output.write(Double.toString(stats.averageNumberOfDegreeTwoVertices) + ",");
+							break;
+						case 5:
+							output.write(Double.toString(stats.averageComputationTimeMilliSec) + ",");
+							break;
+						case 6:
+							output.write(Double.toString(stats.averageRadius) + ",");
+							break;
+						case 7:
+							output.write(Double.toString(stats.averageCentroid) + ",");
+							break;
+						case 8:
+							output.write(Double.toString(stats.averageSubTreeSize) + ",");
+							break;
+						case 9:
+							output.write(Double.toString(stats.averageDepth) + ",");
+							break;
+						}
+					}
+
+					output.write("\n");
+				}
+
+			} catch (IOException ex) {
+				// Report
+			} finally {
+				try {
+					output.close();
+				} catch (Exception ex) {
+					/* ignore */}
+			}
+			++i;
+		}
 	}
 }

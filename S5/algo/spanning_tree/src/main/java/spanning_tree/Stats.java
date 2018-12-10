@@ -7,4 +7,8 @@ public class Stats {
 	double averageNumberOfLeaves;
 	double averageNumberOfDegreeTwoVertices;
 	double averageComputationTimeMilliSec;
+	double averageRadius;
+	double averageCentroid;
+	double averageSubTreeSize;
+	double averageDepth;
 }
