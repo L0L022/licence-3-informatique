@@ -145,10 +145,35 @@ void test_append() {
     read_all("essai.txt");
 }
 
+void test_append2() {
+    sgf_remove_file("essai.txt");
+
+    write("essai.txt", "");
+
+    list_directory();
+    read_all("essai.txt");
+
+    for (int i = 0; i < 600; ++i) {
+//        char i_str[12];
+//        sprintf(i_str, "%d, ", i);
+
+        if (i == 127) {
+            int a = 10;
+        }
+
+        OFILE* file = sgf_open_append("essai.txt");
+        sgf_putc(file, 'a' + (i % 26));
+        sgf_close(file);
+    }
+
+    list_directory();
+    read_all("essai.txt");
+}
+
 int main() {
     init_sgf();
 
-    test_append();
+    test_append2();
 
     return (EXIT_SUCCESS);
 }

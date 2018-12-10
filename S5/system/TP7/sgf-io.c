@@ -116,10 +116,11 @@ void sgf_read_block(OFILE* file, int block_number) {
 void sgf_append_block(OFILE* file) {
 
     if (file->mode == APPEND_MODE) {
-        file->mode == WRITE_MODE;
+        file->mode = WRITE_MODE;
 
         write_block(file->inode.last, &file->buffer);
         write_inode(file->adr_inode, file->inode);
+
         return;
     }
 
@@ -298,6 +299,8 @@ OFILE*  sgf_open_append(const char* nom) {
 
     if (file->ptr % BLOCK_SIZE > 0) {
         sgf_read_block(file, file->ptr / BLOCK_SIZE);
+    } else {
+        file->mode = WRITE_MODE;
     }
 
     return (file);
