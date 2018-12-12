@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
+/*
+ * Cette classer permet d'obtenir un arbre couvrant aléatoire par l'algorithme de Wilson.
+ */
+
 public class Wilson implements MinimumWeightSpanningTreeGenerator {
 
 	@Override
@@ -17,34 +21,34 @@ public class Wilson implements MinimumWeightSpanningTreeGenerator {
 
 		int v = graph.maxDegVertex();
 
-		BitSet isVertexVisited = new BitSet(graph.order);
-		isVertexVisited.set(v, true);
+		BitSet isVertexInGraph = new BitSet(graph.order);
+		isVertexInGraph.set(v, true);
 
-		Edge[] chemin = new Edge[graph.adjacency.size()];
+		Edge[] path = new Edge[graph.adjacency.size()];
 
 		while (edges.size() != graph.order - 1) {
 			int u = -1;
 			do {
 				u = graph.randomVertex();
-			} while (isVertexVisited.get(u));
+			} while (isVertexInGraph.get(u));
 
 			int begin = u;
 
-			chemin[u] = graph.randomEdge(u);
-			int w = chemin[u].oppositeExtremity(u);
+			path[u] = graph.randomEdge(u);
+			int w = path[u].oppositeExtremity(u);
 
-			while (!isVertexVisited.get(w)) {
+			while (!isVertexInGraph.get(w)) {
 				u = w;
 
-				chemin[u] = graph.randomEdge(u);
-				w = chemin[u].oppositeExtremity(u);
+				path[u] = graph.randomEdge(u);
+				w = path[u].oppositeExtremity(u);
 			}
 
 			v = begin;
 			while (v != w) {
-				isVertexVisited.set(v, true);
-				edges.add(chemin[v]);
-				v = chemin[v].oppositeExtremity(v);
+				isVertexInGraph.set(v, true);
+				edges.add(path[v]);
+				v = path[v].oppositeExtremity(v);
 			}
 		}
 

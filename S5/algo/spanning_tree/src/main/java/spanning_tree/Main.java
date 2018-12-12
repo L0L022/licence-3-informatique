@@ -16,10 +16,11 @@ public class Main {
 	private static boolean useErdosRenyiGraph = true;
 	private static boolean useLollipopGraph = true;
 
-	private static boolean showGridGraph = true; // empèche exportCSV
+	private static boolean showGridGraph = false; // empèche exportCSV
 
 	private static boolean useBFS = true;
-	private static boolean useKruskal = true;
+	private static boolean useRandomBFS = true;
+	private static boolean useKruskal = false;
 	private static boolean useRandomWeight = true;
 	private static boolean useRandomEdge = true;
 	private static boolean useAldousBroder = true;
@@ -51,6 +52,10 @@ public class Main {
 
 		if (useBFS) {
 			treeGenerators.add(new BreadthFirstSearch());
+		}
+
+		if (useRandomBFS) {
+			treeGenerators.add(new RandomBreadthFirstSearch());
 		}
 
 		if (useKruskal) {

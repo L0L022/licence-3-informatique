@@ -1,5 +1,9 @@
 package spanning_tree;
 
+/*
+ * Stocke les statistiques sur les valeurs calculables de Rooted Tree.
+ */
+
 public class Stats {
 	double averageEccentricity;
 	double averageWienerIndex;

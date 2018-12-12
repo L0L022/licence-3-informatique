@@ -2,13 +2,16 @@ package spanning_tree;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /*
- * Parcours en largeur.
+ * Parcours en largeur aléatoire.
  */
+public class RandomBreadthFirstSearch implements MinimumWeightSpanningTreeGenerator {
 
-public class BreadthFirstSearch implements MinimumWeightSpanningTreeGenerator {
+	private static Random rand = new Random();
 
 	public static ArrayList<Arc> generateTree(Graph graph, int vertex) {
 		BitSet isVertexVisited = new BitSet(graph.order);
@@ -22,7 +25,10 @@ public class BreadthFirstSearch implements MinimumWeightSpanningTreeGenerator {
 		for (int i = 0; i < vertex_left.size(); ++i) {
 			int v = vertex_left.get(i);
 
-			for (Edge edge : graph.adjacency.get(v)) {
+			List<Edge> randomEdges = new ArrayList<>(graph.adjacency.get(v));
+			Collections.shuffle(randomEdges, rand);
+
+			for (Edge edge : randomEdges) {
 				int opposite = edge.oppositeExtremity(v);
 				if (isVertexVisited.get(opposite)) {
 					continue;
@@ -42,7 +48,7 @@ public class BreadthFirstSearch implements MinimumWeightSpanningTreeGenerator {
 	public List<Edge> generateTree(Graph graph) {
 		ArrayList<Edge> tree = new ArrayList<>();
 
-		for (Arc arc : generateTree(graph, 0)) {
+		for (Arc arc : generateTree(graph, graph.randomVertex())) {
 			tree.add(arc.support);
 		}
 
@@ -51,7 +57,7 @@ public class BreadthFirstSearch implements MinimumWeightSpanningTreeGenerator {
 
 	@Override
 	public String name() {
-		return "BreadthFirstSearch";
+		return "RandomBreadthFirstSearch";
 	}
 
 }

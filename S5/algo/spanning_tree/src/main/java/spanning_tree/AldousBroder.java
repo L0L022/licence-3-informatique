@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
+/*
+ * Cette classer permet d'obtenir un arbre couvrant aléatoire par l'algorithme d'Aldous Broder.
+ */
+
 public class AldousBroder implements MinimumWeightSpanningTreeGenerator {
 
 	@Override

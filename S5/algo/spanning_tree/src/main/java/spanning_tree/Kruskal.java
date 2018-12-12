@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/*
+ * Génère un arbre couvrant de poids minimal par l'algorithme de Kruskal.
+ */
 public class Kruskal implements MinimumWeightSpanningTreeGenerator {
 	@Override
 	public List<Edge> generateTree(Graph graph) {

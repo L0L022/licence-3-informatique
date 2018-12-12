@@ -3,18 +3,23 @@ package spanning_tree;
 import java.util.List;
 import java.util.Random;
 
+/*
+ * Affecte des poids aléatoires à chaque arête, puis utilise Kruskal.
+ */
+
 public class RandomWeight implements MinimumWeightSpanningTreeGenerator {
+
+	private static Random rand = new Random();
+
 	@Override
 	public List<Edge> generateTree(Graph graph) {
-		Graph rand_edges = new Graph(graph.adjacency.size());
-
-		Random rand = new Random();
+		Graph graphWithRandomWeightEdges = new Graph(graph.adjacency.size());
 
 		for (Edge edge : graph) {
-			rand_edges.addEdge(new Edge(edge.v1, edge.v2, rand.nextDouble()));
+			graphWithRandomWeightEdges.addEdge(new Edge(edge.v1, edge.v2, rand.nextDouble()));
 		}
 
-		return (new Kruskal()).generateTree(rand_edges);
+		return (new Kruskal()).generateTree(graphWithRandomWeightEdges);
 	}
 
 	@Override

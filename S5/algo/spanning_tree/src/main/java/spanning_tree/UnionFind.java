@@ -1,5 +1,7 @@
 package spanning_tree;
 
+// Classe téléchargée telle quelle sur internet
+
 // simple union-find based on int[] arrays
 // for  "parent" and "rank"
 // implements the "disjoint-set forests" described at
@@ -59,27 +61,27 @@ public class UnionFind {
 
 	/*
 	 * public static void main(String[] args) {
-	 * 
+	 *
 	 * UnionFind uf = new UnionFind(5); System.out.println(uf);
-	 * 
+	 *
 	 * uf.union(1,2); System.out.println("union 1 2"); System.out.println(uf);
-	 * 
+	 *
 	 * uf.union(1,2); System.out.println("union 1 2"); System.out.println(uf);
-	 * 
+	 *
 	 * uf.union(3,4); System.out.println("union 3 4"); System.out.println(uf);
-	 * 
+	 *
 	 * uf.union(1,0); System.out.println("union 1 0"); System.out.println(uf);
-	 * 
+	 *
 	 * uf.union(1,3); System.out.println("union 1 3"); System.out.println(uf);
-	 * 
+	 *
 	 * uf.find(4); System.out.println("find 4"); System.out.println(uf);
-	 * 
+	 *
 	 * }
-	 * 
-	 * 
-	 * 
+	 *
+	 *
+	 *
 	 * The tests in main should produce:
-	 * 
+	 *
 	 * <UnionFind p [0, 1, 2, 3, 4] r [0, 0, 0, 0, 0] > union 1 2 <UnionFind p [0,
 	 * 1, 1, 3, 4] r [0, 1, 0, 0, 0] > union 1 2 <UnionFind p [0, 1, 1, 3, 4] r [0,
 	 * 1, 0, 0, 0] > union 3 4 <UnionFind p [0, 1, 1, 3, 3] r [0, 1, 0, 1, 0] >
