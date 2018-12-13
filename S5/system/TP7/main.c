@@ -31,8 +31,6 @@ void write(const char * filename, const char * data) {
     sgf_close(file);
 }
 
-
-
 void fat_state() {
     static char * fat_state_names[] = {"BLOCK", "FAT_FREE", "FAT_RESERVED", "FAT_INODE", "FAT_EOF"};
 
@@ -111,10 +109,22 @@ void test_file_methods() {
     list_directory();
 }
 
-void test_seek() {
+void test_seek_plus_one() {
     // 240 chars
-   // write("essai.txt", "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab");
+    write("essai.txt", "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab");
 
+    OFILE* file = sgf_open_read("essai.txt");
+    int c;
+    while ((c = sgf_getc(file)) > 0) {
+        putchar(c);
+        sgf_seek(file, file->ptr += 1); // doit afficher 120 a
+    }
+
+    sgf_close(file);
+    printf("\n");   ²
+}
+
+void test_seek_plus_eight() {
     // 160 chars
     write("essai.txt", "abbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbbabbbbbbb");
 
@@ -122,30 +132,19 @@ void test_seek() {
     int c;
     while ((c = sgf_getc(file)) > 0) {
         putchar(c);
-        //sgf_seek(file, file->ptr += 1); // doit afficher 120 a
         sgf_seek(file, file->ptr += 7); // doit afficher 20 a
     }
 
     sgf_close(file);
+    printf("\n");
 }
 
-void test_append() {
-    sgf_remove_file("essai.txt");
-
-    write("essai.txt", "Texte de base.");
-
-    list_directory();
-    read_all("essai.txt");
-
-    OFILE* file = sgf_open_append("essai.txt");
-    sgf_puts(file, "Le nouveau texte !");
-    sgf_close(file);
-
-    list_directory();
-    read_all("essai.txt");
+void test_seek() {
+    test_seek_plus_one();
+    test_seek_plus_eight();
 }
 
-void test_append2() {
+void test_append_empty_file() {
     sgf_remove_file("essai.txt");
 
     write("essai.txt", "");
@@ -154,13 +153,6 @@ void test_append2() {
     read_all("essai.txt");
 
     for (int i = 0; i < 600; ++i) {
-//        char i_str[12];
-//        sprintf(i_str, "%d, ", i);
-
-        if (i == 127) {
-            int a = 10;
-        }
-
         OFILE* file = sgf_open_append("essai.txt");
         sgf_putc(file, 'a' + (i % 26));
         sgf_close(file);
@@ -168,12 +160,56 @@ void test_append2() {
 
     list_directory();
     read_all("essai.txt");
+    printf("\n");
+}
+
+void test_append_filled_file() {
+    sgf_remove_file("essai.txt");
+
+    write("essai.txt", ":");
+
+    list_directory();
+    read_all("essai.txt");
+
+    for (int i = 0; i < 600; ++i) {
+        OFILE* file = sgf_open_append("essai.txt");
+        sgf_putc(file, 'a' + (i % 26));
+        sgf_close(file);
+    }
+
+    list_directory();
+    read_all("essai.txt");
+    printf("\n");
+}
+
+void test_append_new_file() {
+    sgf_remove_file("essai.txt");
+
+    list_directory();
+
+    for (int i = 0; i < 600; ++i) {
+        OFILE* file = sgf_open_append("essai.txt");
+        sgf_putc(file, 'a' + (i % 26));
+        sgf_close(file);
+    }
+
+    list_directory();
+
+    read_all("essai.txt");
+    printf("\n");
+}
+
+void test_append() {
+    test_append_empty_file();
+    test_append_filled_file();
+    test_append_new_file();
 }
 
 int main() {
     init_sgf();
 
-    test_append2();
+    test_seek();
+    test_append();
 
     return (EXIT_SUCCESS);
 }

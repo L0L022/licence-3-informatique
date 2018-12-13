@@ -277,20 +277,32 @@ OFILE*  sgf_open_read(const char* nom) {
  ************************************************************/
 
 OFILE*  sgf_open_append(const char* nom) {
-    int adr_inode;
+    int adr_inode, new_file = -1;
     INODE inode;
     OFILE* file;
 
     /* Chercher le fichier dans le répertoire */
     adr_inode = find_inode(nom);
-    if (adr_inode < 0) return (NULL);
+    if (adr_inode < 0) {
+        /* Rechercher un bloc libre sur disque */
+        adr_inode = create_inode(&inode);
+        if (adr_inode < 0) return NULL;
 
-    /* lire l'INODE */
-    inode = read_inode(adr_inode);
+        new_file = 1;
+    } else {
+        /* lire l'INODE */
+        inode = read_inode(adr_inode);
+    }
 
     /* Allouer une structure OFILE */
     file = malloc(sizeof(OFILE));
     if (file == NULL) return (NULL);
+
+    if (new_file > 0) {
+        /* mettre à jour le répertoire */
+        int oldinode = add_inode(nom, adr_inode);
+        if (oldinode > 0) sgf_remove(oldinode);
+    }
 
     file->inode     = inode;
     file->adr_inode = adr_inode;
