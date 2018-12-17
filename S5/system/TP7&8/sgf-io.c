@@ -42,9 +42,7 @@ int sgf_getc(OFILE* file) {
         return -1;
     }
 
-    int local_ptr = file->ptr % BLOCK_SIZE;
-
-    if (local_ptr == 0) {
+    if (file->ptr % BLOCK_SIZE == 0) {
         sgf_read_block(file, file->ptr / BLOCK_SIZE);
     }
 
@@ -57,14 +55,12 @@ int sgf_seek(OFILE* file, int pos) {
         return -1;
     }
 
-    if (pos % BLOCK_SIZE || file->ptr / BLOCK_SIZE == pos / BLOCK_SIZE) {
+    if (pos % BLOCK_SIZE  == 0 || file->ptr / BLOCK_SIZE == pos / BLOCK_SIZE) {
         file->ptr = pos;
         return 0;
     }
 
-    file->ptr = pos;
-
-    sgf_read_block(file, file->ptr / BLOCK_SIZE);
+    sgf_read_block(file, file->ptr = pos / BLOCK_SIZE);
 
     return 0;
 }
@@ -233,6 +229,7 @@ OFILE*  sgf_open_write(const char* nom) {
     
     /* mettre à jour le répertoire */
     oldinode = add_inode(nom, adr_inode);
+    if (oldinode < 0) return NULL;
     if (oldinode > 0) sgf_remove(oldinode);
     
     file->inode     = inode;
@@ -301,6 +298,7 @@ OFILE*  sgf_open_append(const char* nom) {
     if (new_file > 0) {
         /* mettre à jour le répertoire */
         int oldinode = add_inode(nom, adr_inode);
+        if (oldinode < 0) return NULL;
         if (oldinode > 0) sgf_remove(oldinode);
     }
 

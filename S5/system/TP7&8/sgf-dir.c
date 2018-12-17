@@ -130,13 +130,11 @@ void create_empty_directory () {
  ************************************************************/
 
 void list_directory (void) {
-    unsigned int i;
-    DIR_ENTRY dir;
-
     printf("  Size Name\n------ ------------\n");
 
-    for (i = 0; i < DIR_SIZE; ++i) {
-        dir = directory.files[i];
+    for (size_t i = 0; i < DIR_SIZE; ++i) {
+        DIR_ENTRY dir = directory.files[i];
+
         if (dir.adr_inode <= 0) {
             continue;
         }
