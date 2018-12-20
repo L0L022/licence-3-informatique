@@ -38,6 +38,8 @@ void init_sgf(void) {
  ************************************************************/
 
 int sgf_getc(OFILE* file) {
+    assert(file->mode == READ_MODE);
+
     if (file->ptr >= file->inode.size) {
         return -1;
     }
@@ -50,7 +52,9 @@ int sgf_getc(OFILE* file) {
 }
 
 int sgf_seek(OFILE* file, int pos) {
-    if (pos >= file->inode.size) {
+    assert(file->mode == READ_MODE);
+
+    if (pos >= file->inode.size || pos < 0) {
         file->ptr = pos;
         return -1;
     }
@@ -80,13 +84,13 @@ int sgf_seek(OFILE* file, int pos) {
  ************************************************************/
 
 void sgf_read_block(OFILE* file, int block_number) {
-    int block = file->inode.first;
+    int block_addr = file->inode.first;
 
     for (int i = 0; i < block_number; ++i) {
-        block = get_fat(block);
+        block_addr = get_fat(block_addr);
     }
 
-    read_block(block, &file->buffer);
+    read_block(block_addr, &file->buffer);
 }
 
 
@@ -110,25 +114,31 @@ void sgf_read_block(OFILE* file, int block_number) {
  ************************************************************/
 
 void sgf_append_block(OFILE* file) {
+    switch (file->mode) {
+    case WRITE_MODE: {
+        int block_addr = alloc_block();
+        assert(block_addr > 0);
 
-    if (file->mode == APPEND_MODE) {
+        write_block(block_addr, &file->buffer);
+        set_fat(block_addr, FAT_EOF);
+
+        if (file->inode.first == FAT_EOF) {
+            file->inode.first = file->inode.last = block_addr;
+        } else {
+            set_fat(file->inode.last, block_addr);
+            file->inode.last = block_addr;
+        }
+        break;
+    }
+    case APPEND_MODE: {
         file->mode = WRITE_MODE;
 
         write_block(file->inode.last, &file->buffer);
         write_inode(file->adr_inode, file->inode);
-
-        return;
+        break;
     }
-
-    int block_addr = alloc_block();
-    write_block(block_addr, &file->buffer);
-    set_fat(block_addr, FAT_EOF);
-
-    if (file->inode.first == FAT_EOF) {
-        file->inode.first = file->inode.last = block_addr;
-    } else {
-        set_fat(file->inode.last, block_addr);
-        file->inode.last = block_addr;
+    case READ_MODE:
+        return;
     }
 
     write_inode(file->adr_inode, file->inode);
@@ -147,6 +157,8 @@ void sgf_append_block(OFILE* file) {
  ************************************************************/
 
 void sgf_putc(OFILE* file, char  c) {
+    assert (file->mode == WRITE_MODE || file->mode == APPEND_MODE);
+
     file->inode.size++;
     file->buffer[file->ptr++ % BLOCK_SIZE] = c;
 
@@ -180,17 +192,13 @@ void sgf_puts(OFILE* file, char* s) {
 
 void sgf_remove(int  adr_inode) {
     INODE inode = read_inode(adr_inode);
-    int block;
 
-    for (block = inode.first; block != inode.last;) {
-        int old_block = block;
-        block = get_fat(block);
-        set_fat(old_block, FAT_FREE);
+    for (int block_addr = inode.first; block_addr != FAT_EOF;) {
+        int old_block_addr = block_addr;
+        block_addr = get_fat(block_addr);
+        set_fat(old_block_addr, FAT_FREE);
     }
 
-    if (inode.last > 0) {
-        set_fat(inode.last, FAT_FREE);
-    }
     set_fat(adr_inode, FAT_FREE);
 }
 
@@ -274,33 +282,22 @@ OFILE*  sgf_open_read(const char* nom) {
  ************************************************************/
 
 OFILE*  sgf_open_append(const char* nom) {
-    int adr_inode, new_file = -1;
+    int adr_inode;
     INODE inode;
     OFILE* file;
 
     /* Chercher le fichier dans le répertoire */
     adr_inode = find_inode(nom);
     if (adr_inode < 0) {
-        /* Rechercher un bloc libre sur disque */
-        adr_inode = create_inode(&inode);
-        if (adr_inode < 0) return NULL;
-
-        new_file = 1;
-    } else {
-        /* lire l'INODE */
-        inode = read_inode(adr_inode);
+        return sgf_open_write(nom);
     }
+
+    /* lire l'INODE */
+    inode = read_inode(adr_inode);
 
     /* Allouer une structure OFILE */
     file = malloc(sizeof(OFILE));
     if (file == NULL) return (NULL);
-
-    if (new_file > 0) {
-        /* mettre à jour le répertoire */
-        int oldinode = add_inode(nom, adr_inode);
-        if (oldinode < 0) return NULL;
-        if (oldinode > 0) sgf_remove(oldinode);
-    }
 
     file->inode     = inode;
     file->adr_inode = adr_inode;
@@ -326,15 +323,11 @@ OFILE*  sgf_open_append(const char* nom) {
  ************************************************************/
 
 void sgf_close(OFILE* file) {
-    if (file->mode == READ_MODE) {
-        return;
+    if (file->mode != READ_MODE && file->ptr % BLOCK_SIZE != 0) {
+        sgf_append_block(file);
     }
 
-    if (file->ptr % BLOCK_SIZE == 0) {
-        return;
-    }
-
-    sgf_append_block(file);
+    free(file);
 }
 
 void sgf_remove_file(const char *filename) {

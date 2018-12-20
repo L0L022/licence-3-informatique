@@ -150,8 +150,8 @@ void test_remove_file() {
 
     for (int i = 0; i < 3; ++i) {
         OFILE * f = sgf_open_read(files_name[i]);
+        sgf_close(f);
         assert(f != NULL);
-        free(f);
     }
 
     for (int i = 0; i < 3; ++i) {
@@ -187,7 +187,9 @@ void test_append_empty_file() {
 }
 
 void test_append_filled_file() {
-    char * original = malloc(strlen(text1) + strlen(text3));
+    char * original = malloc(strlen(text1) + strlen(text3) + 1);
+    original[0] = '\0';
+
     strcat(original, text1);
     strcat(original, text3);
     size_t original_length = strlen(original);
