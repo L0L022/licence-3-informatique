@@ -134,7 +134,6 @@ void sgf_append_block(OFILE* file) {
         file->mode = WRITE_MODE;
 
         write_block(file->inode.last, &file->buffer);
-        write_inode(file->adr_inode, file->inode);
         break;
     }
     case READ_MODE:
