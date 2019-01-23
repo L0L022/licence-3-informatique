@@ -1,0 +1,136 @@
+grammar;
+
+use crate::lexer::{Token, LexicalError};
+use crate::lexical::*;
+
+use crate::lexer::Token as T;
+
+pub Program = <Statement*>;
+
+Statement = {
+    DclFunction,
+    <Comma<DclVariable>> ";" => Statement::DclVariable(<>),
+};
+
+DclFunction : Statement = <i:Id> "(" <p:Comma<DclScalar>> ")" <v:(<Comma<DclVariable>> ";")?> "{" <is:Instruction*> "}" => Statement::DclFunction(i, p, v.unwrap_or(Vec::new()), is);
+//DclVariable : Variable = <t:Id> "$" <i:Id> => (Type::try_from(t).unwrap(), i);
+
+DclVariable : Variable = {
+    DclScalar => Variable::Scalar(<>),
+    DclVector => Variable::Vector(<>),
+}
+
+DclScalar : Scalar = <t:Id> "$" <i:Id> => (Type::try_from(t).unwrap(), i);
+DclVector : Vector = <t:Id> "$" <i:Id> "[" <o:Integer> "]" => (Type::try_from(t).unwrap(), o, i);
+
+Instruction : Instruction = {
+    <Affectation> ";",
+    <Expression> ";" => Instruction::Eval(<>),
+    Return <(Expression)?> ";" => Instruction::Return(<>),
+    If <e:BooleanExpression> Then "{" <i1:Instruction*> "}" <i2:(Else "{" <Instruction*> "}")?> => Instruction::If(e, i1, i2.unwrap_or(Vec::new())),
+    While <BooleanExpression> Do "{" <Instruction*> "}" => Instruction::While(<>),
+};
+
+Affectation : Instruction = <LeftValue> "=" <Expression> => Instruction::Affectation(<>);
+
+Expression : Expression = {
+    AtomicExpression,
+    <l:AtomicExpression> <o:Operator> <r:Expression> => Expression::Operation(o, Box::new(l), Box::new(r)),
+};
+
+AtomicExpression : Expression = {
+    Integer => Expression::Value(<>),
+    CallFunction,
+    LeftValue => Expression::LeftValue(<>),
+};
+
+LeftValue : LeftValue = "$" <i:Id> <o:("[" <Expression> "]")?> => match o {
+        Some(o) => LeftValue::VariableAt(i, Box::new(o)),
+        None => LeftValue::Variable(i),
+};
+
+CallFunction : Expression = <i:Id> "(" <e:Comma<Expression>> ")" => Expression::CallFunction(i, e);
+
+Operator : ArithmeticOperator = {
+    "+" => ArithmeticOperator::Addidion,
+    "-" => ArithmeticOperator::Subtraction,
+    "*" => ArithmeticOperator::Multiplication,
+    "/" => ArithmeticOperator::Division,
+}
+
+BooleanExpression : BooleanExpression = {
+    AtomicBooleanExpression,
+    <l:AtomicBooleanExpression> "&" <r:BooleanExpression> => BooleanExpression::And(Box::new(l), Box::new(r)),
+    <l:AtomicBooleanExpression> "|" <r:BooleanExpression> => BooleanExpression::Or(Box::new(l), Box::new(r)),
+    "!" <BooleanExpression> => BooleanExpression::Not(Box::new(<>)),
+};
+
+AtomicBooleanExpression : BooleanExpression = {
+    <Expression> "=" <Expression> => BooleanExpression::Equal(<>),
+    <Expression> "<" <Expression> => BooleanExpression::LessThan(<>),
+};
+
+Comma<T>: ::std::vec::Vec<T> = {
+    <v:(<T> ",")*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            let mut v = v;
+            v.push(e);
+            v
+        }
+    }
+};
+
+extern {
+    type Location = usize;
+    type Error = LexicalError;
+
+    enum Token {
+        Integer => T::Integer(<i32>),
+        Id => T::Id(<String>),
+
+        "," => T::Comma,
+        ";" => T::Semicolon,
+        "$" => T::Dollar,
+
+        // Instructions
+
+        Return => T::Return,
+        If => T::If,
+        Then => T::Then,
+        Else => T::Else,
+        While => T::While,
+        Do => T::Do,
+
+        // Brackets
+
+        "(" => T::OpenParenthesis,
+        ")" => T::CloseParenthesis,
+        "{" => T::OpenCurlyBracket,
+        "}" => T::CloseCurlyBracket,
+        "[" => T::OpenSquareBracket,
+        "]" => T::CloseSquareBracket,
+
+        // Operators
+
+        "+" => T::Addition,
+        "-" => T::Subtraction,
+        "*" => T::Multiplication,
+        "/" => T::Division,
+        "<" => T::LessThan,
+        "=" => T::Equal,
+        "&" => T::And,
+        "|" => T::Or,
+        "!" => T::Not,
+    }
+}
+
+//pub Program = <Statement*>;
+
+//Statement = {
+//	DclVariables
+//}
+
+//DclVariables = <DclVariable+> ";"
+
+//DclVariable: Statement = <t:"id"> "$" <i:"id"> => Statement::DclVariable(t, i)
