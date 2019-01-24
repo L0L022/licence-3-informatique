@@ -9,19 +9,19 @@ pub Program = <Statement*>;
 
 Statement = {
     DclFunction,
-    <Comma<DclVariable>> ";" => Statement::DclVariable(<>),
+    DclVariable,
 };
 
-DclFunction : Statement = <i:Id> "(" <p:Comma<DclScalar>> ")" <v:(<Comma<DclVariable>> ";")?> "{" <is:Instruction*> "}" => Statement::DclFunction(i, p, v.unwrap_or(Vec::new()), is);
-//DclVariable : Variable = <t:Id> "$" <i:Id> => (Type::try_from(t).unwrap(), i);
+DclFunction : Statement = <i:Id> "(" <p:Comma<Scalar>> ")" <v:(<Comma<Variable>> ";")?> "{" <is:Instruction*> "}" => Statement::DclFunction(i, p, v.unwrap_or(Vec::new()), is);
+DclVariable : Statement = <Comma<Variable>> ";" => Statement::DclVariable(<>);
 
-DclVariable : Variable = {
-    DclScalar => Variable::Scalar(<>),
-    DclVector => Variable::Vector(<>),
-}
+Variable : Variable = {
+    Scalar => Variable::Scalar(<>),
+    Vector => Variable::Vector(<>),
+};
 
-DclScalar : Scalar = <t:Id> "$" <i:Id> => (Type::try_from(t).unwrap(), i);
-DclVector : Vector = <t:Id> "$" <i:Id> "[" <o:Integer> "]" => (Type::try_from(t).unwrap(), o, i);
+Scalar : Scalar = <t:Id> "$" <i:Id> => (Type::try_from(t).unwrap(), i);
+Vector : Vector = <t:Id> "$" <i:Id> "[" <o:Integer> "]" => (Type::try_from(t).unwrap(), o, i);
 
 Instruction : Instruction = {
     <Affectation> ";",
@@ -33,9 +33,31 @@ Instruction : Instruction = {
 
 Affectation : Instruction = <LeftValue> "=" <Expression> => Instruction::Affectation(<>);
 
-Expression : Expression = {
+Expression = ExpressionL1;
+
+ExpressionL1 = {
+    ExpressionL2,
+    <l:ExpressionL1> <o:OperationExpressionL1> <r:ExpressionL2> => Expression::Operation(o, Box::new(l), Box::new(r)),
+};
+
+OperationExpressionL1 : ArithmeticOperator = {
+    "+" => ArithmeticOperator::Addidion,
+    "-" => ArithmeticOperator::Subtraction,
+};
+
+ExpressionL2 = {
+    ExpressionL3,
+    <l:ExpressionL2> <o:OperationExpressionL2> <r:ExpressionL3> => Expression::Operation(o, Box::new(l), Box::new(r)),
+};
+
+OperationExpressionL2 : ArithmeticOperator = {
+    "*" => ArithmeticOperator::Multiplication,
+    "/" => ArithmeticOperator::Division,
+};
+
+ExpressionL3 = {
     AtomicExpression,
-    <l:AtomicExpression> <o:Operator> <r:Expression> => Expression::Operation(o, Box::new(l), Box::new(r)),
+    "(" <ExpressionL1> ")",
 };
 
 AtomicExpression : Expression = {
@@ -52,18 +74,22 @@ LeftValue : LeftValue = "$" <i:Id> <o:("[" <Expression> "]")?> => match o {
 
 CallFunction : Expression = <i:Id> "(" <e:Comma<Expression>> ")" => Expression::CallFunction(i, e);
 
-Operator : ArithmeticOperator = {
-    "+" => ArithmeticOperator::Addidion,
-    "-" => ArithmeticOperator::Subtraction,
-    "*" => ArithmeticOperator::Multiplication,
-    "/" => ArithmeticOperator::Division,
-}
+BooleanExpression = BooleanExpressionL1;
 
-BooleanExpression : BooleanExpression = {
+BooleanExpressionL1 = {
+    BooleanExpressionL2,
+    <l:BooleanExpressionL1> "|" <r:BooleanExpressionL2> => BooleanExpression::Or(Box::new(l), Box::new(r)),
+};
+
+BooleanExpressionL2 = {
+    BooleanExpressionL3,
+    <l:BooleanExpressionL2> "&" <r:BooleanExpressionL3> => BooleanExpression::And(Box::new(l), Box::new(r)),
+};
+
+BooleanExpressionL3 = {
     AtomicBooleanExpression,
-    <l:AtomicBooleanExpression> "&" <r:BooleanExpression> => BooleanExpression::And(Box::new(l), Box::new(r)),
-    <l:AtomicBooleanExpression> "|" <r:BooleanExpression> => BooleanExpression::Or(Box::new(l), Box::new(r)),
-    "!" <BooleanExpression> => BooleanExpression::Not(Box::new(<>)),
+    "(" <BooleanExpressionL1> ")",
+    "!" <BooleanExpressionL3> => BooleanExpression::Not(Box::new(<>)),
 };
 
 AtomicBooleanExpression : BooleanExpression = {
@@ -125,13 +151,3 @@ extern {
         "!" => T::Not,
     }
 }
-
-//pub Program = <Statement*>;
-
-//Statement = {
-//	DclVariables
-//}
-
-//DclVariables = <DclVariable+> ";"
-
-//DclVariable: Statement = <t:"id"> "$" <i:"id"> => Statement::DclVariable(t, i)

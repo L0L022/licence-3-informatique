@@ -95,9 +95,11 @@ entier $echange, entier $j, entier $m;
 main()
 {
     initialiser();
-    afficher(20-10+30*34*1/4+f());
+    afficher(3+2*6/f(2-3-4));
     trier( -10 );
-    afficher( -10 + -2 );
+    afficher( 2*(6+3) );
+	si !f() = g() & !h()=0 | g() = 2 & f() = 3 & i() = 7 alors {
+	}
 }
 
 ";
