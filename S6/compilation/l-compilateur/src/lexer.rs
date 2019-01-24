@@ -7,12 +7,16 @@ enum LogosToken {
 
 	#[error]
 	Error,
-
+// entier non négatif
+// il faut repenser tout le système
 	#[regex = "[0-9]+"]
 	Integer,
 
-	#[regex = "[a-zA-Z][a-zA-Z_0-9]*"]
+	#[regex = "[a-zA-Z_][a-zA-Z0-9_-]*"]
 	Id,
+
+	#[regex = "#.*"]
+	Comment,
 
 	#[token = ","]
 	Comma,
@@ -95,9 +99,6 @@ enum LogosToken {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
-	End,
-	Error,
-
 	Integer(i32),
 	Id(String),
 	Comma,
@@ -137,7 +138,14 @@ pub enum Token {
 
 #[derive(Debug)]
 pub enum LexicalError {
-    Error
+    Error,
+	ParseInteger,
+}
+
+impl From<std::num::ParseIntError> for LexicalError {
+	fn from(error: std::num::ParseIntError) -> Self {
+		LexicalError::ParseInteger
+	}
 }
 
 pub struct Lexer<'input> {
@@ -158,50 +166,63 @@ impl<'input> Iterator for Lexer<'input> {
 	type Item = Spanned<Token, usize, LexicalError>;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		let t = self.lexer.token;
+		loop {
+			use LogosToken::*;
 
-		match t {
-			LogosToken::End => None,
-			LogosToken::Error => Some(Err(LexicalError::Error)),
-			_ => {
-				use LogosToken::*;
-				use Token as T;
-				use std::str::FromStr;
+			let t = self.lexer.token;
 
-				let tt = match t {
-					End => T::End,
-					Error => T::End,
-					Integer => T::Integer(i32::from_str(self.lexer.slice()).unwrap()),
-					Id => T::Id(self.lexer.slice().to_string()),
-					Comma => T::Comma,
-					Semicolon => T::Semicolon,
-					Dollar => T::Dollar,
-					Return => T::Return,
-					If => T::If,
-					Then => T::Then,
-					Else => T::Else,
-					While => T::While,
-					Do => T::Do,
-					OpenParenthesis => T::OpenParenthesis,
-					CloseParenthesis => T::CloseParenthesis,
-					OpenCurlyBracket => T::OpenCurlyBracket,
-					CloseCurlyBracket => T::CloseCurlyBracket,
-					OpenSquareBracket => T::OpenSquareBracket,
-					CloseSquareBracket => T::CloseSquareBracket,
-					Addition => T::Addition,
-					Subtraction => T::Subtraction,
-					Multiplication => T::Multiplication,
-					Division => T::Division,
-					LessThan => T::LessThan,
-					Equal => T::Equal,
-					And => T::And,
-					Or => T::Or,
-					Not => T::Not,
-				};
+			return match t {
+				End => None,
+				Error => Some(Err(LexicalError::Error)),
+				Comment => {
+					self.lexer.advance();
+					continue
+				},
+				_ => {
+					use Token as T;
+					use std::str::FromStr;
 
-				let r = self.lexer.range();
-				self.lexer.advance();
-				Some(Ok((r.start, tt, r.end)))
+					let tt = match t {
+						End => unreachable!(),
+						Error => unreachable!(),
+						Integer => {
+							match self.lexer.slice().parse::<i32>() {
+								Ok(v) => T::Integer(v),
+								Err(e) => return Some(Err(LexicalError::ParseInteger)),
+							}
+						},
+						Id => T::Id(self.lexer.slice().to_string()),
+						Comment => unreachable!(),
+						Comma => T::Comma,
+						Semicolon => T::Semicolon,
+						Dollar => T::Dollar,
+						Return => T::Return,
+						If => T::If,
+						Then => T::Then,
+						Else => T::Else,
+						While => T::While,
+						Do => T::Do,
+						OpenParenthesis => T::OpenParenthesis,
+						CloseParenthesis => T::CloseParenthesis,
+						OpenCurlyBracket => T::OpenCurlyBracket,
+						CloseCurlyBracket => T::CloseCurlyBracket,
+						OpenSquareBracket => T::OpenSquareBracket,
+						CloseSquareBracket => T::CloseSquareBracket,
+						Addition => T::Addition,
+						Subtraction => T::Subtraction,
+						Multiplication => T::Multiplication,
+						Division => T::Division,
+						LessThan => T::LessThan,
+						Equal => T::Equal,
+						And => T::And,
+						Or => T::Or,
+						Not => T::Not,
+					};
+
+					let r = self.lexer.range();
+					self.lexer.advance();
+					Some(Ok((r.start, tt, r.end)))
+				}
 			}
 		}
 	}

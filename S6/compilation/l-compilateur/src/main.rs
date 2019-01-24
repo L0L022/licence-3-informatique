@@ -36,6 +36,10 @@ entier $v_1, entier $v_2;
 ";
 let t3 =
 "
+#mon super programme !!!!
+# il fait plein de trucs !
+###### c'est la folie #####
+
 entier $tab[ 10 ];
 
 initialiser()
@@ -57,28 +61,30 @@ entier $i;
     ecrire( 0 );
 }
 
+# plein de commentaires !
+
 echanger( entier $i, entier $j )
 entier $temp;
-{
+{#commentaire
     $temp = $tab[ $j ];
     $tab[ $j ] = $tab[ $i ];
     $tab[ $i ] = $temp;
-}
+} # un autre comentaire !
 
 trier( entier $n )
 entier $echange, entier $j, entier $m;
 {
     $m = $n;
     $echange = 1;
-    tantque $echange = 1 faire
+    tantque $echange = 1 faire # un petit tant que
     {
-        $echange = 0;
+        $echange = 0;# on déclare une variable
         $j = 0;
         tantque $j < $m - 1 faire
         {
             si $tab[ $j + 1 ] < $tab[ $j ] alors {
                 echanger( $j, $j + 1 );
-                $echange = 1;
+                $echange = 1; # on a une autre fonction
             }
             $j = $j + 1;
         }
@@ -89,13 +95,30 @@ entier $echange, entier $j, entier $m;
 main()
 {
     initialiser();
-    afficher( 10 );
-    trier( 10 );
-    afficher( 10 );
+    afficher(20-10+30*34*1/4+f());
+    trier( -10 );
+    afficher( -10 + -2 );
 }
 
 ";
 
-	let lexer = lexer::Lexer::new(t3);
-    println!("{:#?}", lexical::lexical::ProgramParser::new().parse(lexer));
+	let t = t3;
+	let lexer = lexer::Lexer::new(t);
+	use lalrpop_util::ParseError::*;
+	match lexical::lexical::ProgramParser::new().parse(lexer) {
+		Ok(v) => println!("{:#?}", v),
+		Err(e) => match e {
+			InvalidToken { location } => println!("{:?}", location),
+			UnrecognizedToken { token, expected } => {
+				if let Some(token) = token {
+					println!("{:?}", &t[token.0 .. token.2]);
+					println!("{:?}", token.1);
+				} else {
+					println!("{:?} {:?}", token, expected)
+				}
+			},
+			ExtraToken { token } => println!("{:?}", token),
+			User { error } => println!("{:?}", error),
+		}
+	}
 }
