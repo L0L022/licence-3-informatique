@@ -18,3 +18,7 @@ structopt = "0.2.14"
 failure = "0.1.5"
 failure_derive = "0.1.5"
 exitfailure = "0.5.1"
+
+[[bin]]
+name = "l-compilator"
+path = "src/main.rs"

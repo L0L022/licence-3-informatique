@@ -4,9 +4,39 @@ Un compilateur pour le langage l écrit en Rust.
 
 ## Compilation
 
-installer rustup
-cargo build release
+D'abord il faut installer [cargo](https://rustup.rs/), puis :
 
-## Commandes
+```bash
+# Build
+cd l-compilator
+cargo build --release
 
-l-compilator -h
+# Optional: run unit tests and integration tests
+cargo test
+
+# Run without install
+cargo run --release -- -h
+
+# Install
+cargo install --path .
+```
+
+## Les options
+
+```
+USAGE:
+    l-compilator [FLAGS] <source_file>
+
+FLAGS:
+    -a               Affiche l'arbre abstrait
+    -h, --help       Prints help information
+    -l               Affiche les tokens de l'analyse lexicale
+    -n               Affiche le code nasm (actif par defaut)
+    -s               Affiche l'arbre de derivation
+    -t               Affiche la table des symboles
+    -3               Affiche le code trois adresses
+    -V, --version    Prints version information
+
+ARGS:
+    <source_file>    Le fichier l source
+```
