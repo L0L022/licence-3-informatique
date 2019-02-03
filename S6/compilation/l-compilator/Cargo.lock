@@ -257,6 +257,8 @@ name = "l-compilator"
 version = "0.1.0"
 dependencies = [
  "exitfailure 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure_derive 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "lalrpop 0.16.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lalrpop-util 0.16.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "logos 0.9.7 (registry+https://github.com/rust-lang/crates.io-index)",

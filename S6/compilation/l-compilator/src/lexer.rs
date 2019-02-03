@@ -1,305 +1,336 @@
+use failure::Error;
 use logos::Logos;
 
-// TODO : ajout fonction de création de fichier lex
-
 pub struct Lexer<'input> {
-	lexer: logos::Lexer<LogosToken, &'input str>,
+    lexer: logos::Lexer<LogosToken, &'input str>,
 }
 
 impl<'input> Lexer<'input> {
-	pub fn new(input: &'input str) -> Self {
-		Lexer {
-			lexer: LogosToken::lexer(input)
-		}
-	}
+    pub fn new(input: &'input str) -> Self {
+        Lexer { lexer: LogosToken::lexer(input) }
+    }
+
+    pub fn into_lex(self) -> Result<String, Error> {
+        let mut lex = String::new();
+        let input = self.lexer.source;
+
+        for spanned in self {
+            let (begin, token, end) = spanned?;
+            let line = format!(
+                "{}\t{}\t{}\n",
+                &input[begin..end],
+                token.lex_name(),
+                token.lex_value()
+            );
+            lex.push_str(&line);
+        }
+
+        Ok(lex)
+    }
 }
 
-#[derive(Debug)]
-pub enum LexicalError {
-    ReadError(std::ops::Range<usize>),
-	ParseNumber(std::ops::Range<usize>, std::num::ParseIntError),
+#[derive(Debug, Fail)]
+#[fail(display = "lexical error occured at [{:?}] with this token: {}", range, token)]
+pub struct LexicalError {
+    token: String,
+    range: std::ops::Range<usize>,
 }
+
+#[derive(Debug, Fail)]
+#[fail(display = "undefined behavior")]
+pub struct UndefinedBehavior;
 
 pub type Spanned<Tok, Loc, Error> = Result<(Loc, Tok, Loc), Error>;
 
 impl<'input> Iterator for Lexer<'input> {
-	type Item = Spanned<Token, usize, LexicalError>;
+    type Item = Spanned<Token, usize, Error>;
 
-	fn next(&mut self) -> Option<Self::Item> {
-		loop {
-			use LogosToken::*;
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            use LogosToken::*;
 
-			let logos_token = self.lexer.token;
-            let range = self.lexer.range();
+            let logos_token = self.lexer.token;
 
-			return match logos_token {
-				End => None,
-				Error => Some(Err(LexicalError::ReadError(range))),
-				Comment => {
-					self.lexer.advance();
-					continue
-				},
-				_ => {
-					use Token as T;
+            return match logos_token {
+                End => None,
+                Comment => {
+                    self.lexer.advance();
+                    continue;
+                }
+                _ => {
+                    let range = self.lexer.range();
 
-					let token = match logos_token {
-						End => unreachable!(),
-						Error => unreachable!(),
-						Number => {
-							match self.lexer.slice().parse::<i32>() {
-								Ok(v) => T::Number(v),
-								Err(e) => return Some(Err(LexicalError::ParseNumber(range, e))),
-							}
-						},
-						Id => T::Id(self.lexer.slice().to_string()),
-						Comment => unreachable!(),
-						Comma => T::Comma,
-						Semicolon => T::Semicolon,
-                        IntegerType => T::IntegerType,
-                        ReadFunction => T::ReadFunction,
-                        WriteFunction => T::WriteFunction,
-						Return => T::Return,
-						If => T::If,
-						Then => T::Then,
-						Else => T::Else,
-						While => T::While,
-						Do => T::Do,
-						OpenParenthesis => T::OpenParenthesis,
-						CloseParenthesis => T::CloseParenthesis,
-						OpenCurlyBracket => T::OpenCurlyBracket,
-						CloseCurlyBracket => T::CloseCurlyBracket,
-						OpenSquareBracket => T::OpenSquareBracket,
-						CloseSquareBracket => T::CloseSquareBracket,
-						Addition => T::Addition,
-						Subtraction => T::Subtraction,
-						Multiplication => T::Multiplication,
-						Division => T::Division,
-						LessThan => T::LessThan,
-						Equal => T::Equal,
-						And => T::And,
-						Or => T::Or,
-						Not => T::Not,
-					};
+                    let token = match logos_token.to_token(self.lexer.slice()) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            let e = e.context(LexicalError {
+                                token: self.lexer.slice().to_string(),
+                                range,
+                            });
+                            return Some(Err(e.into()));
+                        }
+                    };
 
-					self.lexer.advance();
-					Some(Ok((range.start, token, range.end)))
-				}
-			}
-		}
-	}
+                    self.lexer.advance();
+                    Some(Ok((range.start, token, range.end)))
+                }
+            };
+        }
+    }
 }
-
-// TODO : ajout méthodes name et value
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
-	Number(i32),
-	Id(String),
-	Comma,
-	Semicolon,
+    Number(i32),
+    Id(String),
+    Comma,
+    Semicolon,
 
-	// Types
-
+    // Types
     IntegerType,
 
     // Predefined functions
     ReadFunction,
     WriteFunction,
 
-	// Instructions
+    // Instructions
+    Return,
+    If,
+    Then,
+    Else,
+    While,
+    Do,
 
-	Return,
-	If,
-	Then,
-	Else,
-	While,
-	Do,
+    // Brackets
+    OpenParenthesis,
+    CloseParenthesis,
+    OpenCurlyBracket,
+    CloseCurlyBracket,
+    OpenSquareBracket,
+    CloseSquareBracket,
 
-	// Brackets
-
-	OpenParenthesis,
-	CloseParenthesis,
-	OpenCurlyBracket,
-	CloseCurlyBracket,
-	OpenSquareBracket,
-	CloseSquareBracket,
-
-	// Operators
-
-	Addition,
-	Subtraction,
-	Multiplication,
-	Division,
-	LessThan,
-	Equal,
-	And,
-	Or,
-	Not,
+    // Operators
+    Addition,
+    Subtraction,
+    Multiplication,
+    Division,
+    LessThan,
+    Equal,
+    And,
+    Or,
+    Not,
 }
 
-use std::fmt;
+impl Token {
+    pub fn lex_name(&self) -> &'static str {
+        use Token::*;
 
-impl fmt::Display for Token {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Number(_) => "nombre",
+            Id(_) => "identificateur",
+            IntegerType | ReadFunction | WriteFunction | Return | If | Then | Else | While | Do => {
+                "mot_clef"
+            }
+            Comma | Semicolon | OpenParenthesis | CloseParenthesis | OpenCurlyBracket |
+            CloseCurlyBracket | OpenSquareBracket | CloseSquareBracket | Addition |
+            Subtraction | Multiplication | Division | LessThan | Equal | And | Or | Not => {
+                "symbole"
+            }
+        }
+    }
+
+    pub fn lex_value(&self) -> String {
         use Token::*;
 
         if let Number(n) = self {
-            return write!(f, "nombre\t{}", n);
+            return format!("{}", n);
         }
 
-        let (name, value) : (&str, &str) = match self {
+        match self {
             Number(_) => unreachable!(),
-            Id(id) => ("identificateur", id),
-            Comma => ("symbole", "VIRGULE"),
-            Semicolon => ("symbole", "POINT_VIRGULE"),
+            Id(id) => id,
+            Comma => "VIRGULE",
+            Semicolon => "POINT_VIRGULE",
 
             // Types
-
-            IntegerType => ("mot_clef", "entier"),
+            IntegerType => "entier",
 
             // Predefined functions
-            ReadFunction => ("mot_clef", "lire"),
-            WriteFunction => ("mot_clef", "ecrire"),
+            ReadFunction => "lire",
+            WriteFunction => "ecrire",
 
             // Instructions
-
-            Return => ("mot_clef", "retour"),
-            If => ("mot_clef", "si"),
-            Then => ("mot_clef", "alors"),
-            Else => ("mot_clef", "sinon"),
-            While => ("mot_clef", "tantque"),
-            Do => ("mot_clef", "faire"),
+            Return => "retour",
+            If => "si",
+            Then => "alors",
+            Else => "sinon",
+            While => "tantque",
+            Do => "faire",
 
             // Brackets
-
-            OpenParenthesis => ("symbole", "PARENTHESE_OUVRANTE"),
-            CloseParenthesis => ("symbole", "PARENTHESE_FERMANTE"),
-            OpenCurlyBracket => ("symbole", "ACCOLADE_OUVRANTE"),
-            CloseCurlyBracket => ("symbole", "ACCOLADE_FERMANTE"),
-            OpenSquareBracket => ("symbole", "CROCHET_OUVRANT"),
-            CloseSquareBracket => ("symbole", "CROCHET_FERMANT"),
+            OpenParenthesis => "PARENTHESE_OUVRANTE",
+            CloseParenthesis => "PARENTHESE_FERMANTE",
+            OpenCurlyBracket => "ACCOLADE_OUVRANTE",
+            CloseCurlyBracket => "ACCOLADE_FERMANTE",
+            OpenSquareBracket => "CROCHET_OUVRANT",
+            CloseSquareBracket => "CROCHET_FERMANT",
 
             // Operators
-
-            Addition => ("symbole", "PLUS"),
-            Subtraction => ("symbole", "MOINS"),
-            Multiplication => ("symbole", "FOIS"),
-            Division => ("symbole", "DIVISE"),
-            LessThan => ("symbole", "INFERIEUR"),
-            Equal => ("symbole", "EGAL"),
-            And => ("symbole", "ET"),
-            Or => ("symbole", "OU"),
-            Not => ("symbole", "NON"),
-        };
-
-        write!(f, "{}\t{}", name, value)
+            Addition => "PLUS",
+            Subtraction => "MOINS",
+            Multiplication => "FOIS",
+            Division => "DIVISE",
+            LessThan => "INFERIEUR",
+            Equal => "EGAL",
+            And => "ET",
+            Or => "OU",
+            Not => "NON",
+        }.to_owned()
     }
 }
 
 #[derive(Logos, Debug, PartialEq, Copy, Clone)]
 enum LogosToken {
-	#[end]
-	End,
+    #[end]
+    End,
 
-	#[error]
-	Error,
+    #[error]
+    Error,
 
-	#[regex = "[0-9]+"]
-	Number,
+    #[regex = "[0-9]+"]
+    Number,
 
-	#[regex = "[a-zA-Z_$][a-zA-Z_$0-9]*"]
-	Id,
+    #[regex = "[a-zA-Z_$][a-zA-Z_$0-9]*"]
+    Id,
 
-	#[regex = "#.*"]
-	Comment,
+    #[regex = "#.*"]
+    Comment,
 
-	#[token = ","]
-	Comma,
+    #[token = ","]
+    Comma,
 
-	#[token = ";"]
-	Semicolon,
+    #[token = ";"]
+    Semicolon,
 
     // Types
-
     #[token = "entier"]
     IntegerType,
 
     // Predefined functions
-
-    #[token =  "lire"]
+    #[token = "lire"]
     ReadFunction,
 
     #[token = "ecrire"]
     WriteFunction,
 
-	// Instructions
+    // Instructions
+    #[token = "retour"]
+    Return,
 
-	#[token = "retour"]
-	Return,
+    #[token = "si"]
+    If,
 
-	#[token = "si"]
-	If,
+    #[token = "alors"]
+    Then,
 
-	#[token = "alors"]
-	Then,
+    #[token = "sinon"]
+    Else,
 
-	#[token = "sinon"]
-	Else,
+    #[token = "tantque"]
+    While,
 
-	#[token = "tantque"]
-	While,
+    #[token = "faire"]
+    Do,
 
-	#[token = "faire"]
-	Do,
+    // Brackets
+    #[token = "("]
+    OpenParenthesis,
 
-	// Brackets
+    #[token = ")"]
+    CloseParenthesis,
 
-	#[token = "("]
-	OpenParenthesis,
+    #[token = "{"]
+    OpenCurlyBracket,
 
-	#[token = ")"]
-	CloseParenthesis,
+    #[token = "}"]
+    CloseCurlyBracket,
 
-	#[token = "{"]
-	OpenCurlyBracket,
+    #[token = "["]
+    OpenSquareBracket,
 
-	#[token = "}"]
-	CloseCurlyBracket,
+    #[token = "]"]
+    CloseSquareBracket,
 
-	#[token = "["]
-	OpenSquareBracket,
+    // Operators
+    #[token = "+"]
+    Addition,
 
-	#[token = "]"]
-	CloseSquareBracket,
+    #[token = "-"]
+    Subtraction,
 
-	// Operators
+    #[token = "*"]
+    Multiplication,
 
-	#[token = "+"]
-	Addition,
+    #[token = "/"]
+    Division,
 
-	#[token = "-"]
-	Subtraction,
+    #[token = "<"]
+    LessThan,
 
-	#[token = "*"]
-	Multiplication,
+    #[token = "="]
+    Equal,
 
-	#[token = "/"]
-	Division,
+    #[token = "&"]
+    And,
 
-	#[token = "<"]
-	LessThan,
+    #[token = "|"]
+    Or,
 
-	#[token = "="]
-	Equal,
+    #[token = "!"]
+    Not,
+}
 
-	#[token = "&"]
-	And,
+impl LogosToken {
+    fn to_token(self, token: &str) -> Result<Token, Error> {
+        use LogosToken::*;
+        use Token as T;
 
-	#[token = "|"]
-	Or,
+        let token = match self {
+            End => unreachable!(),
+            Error => return Err(UndefinedBehavior {}.into()),
+            Number => T::Number(token.parse::<i32>()?),
+            Id => T::Id(token.to_string()),
+            Comment => unreachable!(),
+            Comma => T::Comma,
+            Semicolon => T::Semicolon,
+            IntegerType => T::IntegerType,
+            ReadFunction => T::ReadFunction,
+            WriteFunction => T::WriteFunction,
+            Return => T::Return,
+            If => T::If,
+            Then => T::Then,
+            Else => T::Else,
+            While => T::While,
+            Do => T::Do,
+            OpenParenthesis => T::OpenParenthesis,
+            CloseParenthesis => T::CloseParenthesis,
+            OpenCurlyBracket => T::OpenCurlyBracket,
+            CloseCurlyBracket => T::CloseCurlyBracket,
+            OpenSquareBracket => T::OpenSquareBracket,
+            CloseSquareBracket => T::CloseSquareBracket,
+            Addition => T::Addition,
+            Subtraction => T::Subtraction,
+            Multiplication => T::Multiplication,
+            Division => T::Division,
+            LessThan => T::LessThan,
+            Equal => T::Equal,
+            And => T::And,
+            Or => T::Or,
+            Not => T::Not,
+        };
 
-	#[token = "!"]
-	Not,
+        Ok(token)
+    }
 }
 
 #[cfg(test)]
@@ -308,54 +339,41 @@ mod tests {
 
     #[test]
     fn affect_err() {
-        test_l_file("affect-err");
+        test("affect-err");
     }
 
     #[test]
     fn affect() {
-        test_l_file("affect");
+        test("affect");
     }
 
     #[test]
     fn boucle() {
-        test_l_file("boucle");
+        test("boucle");
     }
 
     #[test]
     fn expression() {
-        test_l_file("expression");
+        test("expression");
     }
 
     #[test]
     fn max() {
-        test_l_file("max");
+        test("max");
     }
 
     #[test]
     fn tri() {
-        test_l_file("tri");
+        test("tri");
     }
 
-    fn test_l_file(filename: &str) {
-        // lire fichier .l
-        let file_content = std::fs::read(format!("tests/resources/{}.l", filename)).unwrap();
-        let content = &String::from_utf8_lossy(&file_content);
-        // analyser le programme
-        let l = Lexer::new(&content);
-        // lire la réponse
+    fn test(filename: &str) {
+        let l_file = std::fs::read_to_string(format!("tests/resources/{}.l", filename)).unwrap();
+        let lex_file = std::fs::read_to_string(format!("tests/resources/{}.lex", filename))
+            .unwrap();
 
-        let mut my_lex = String::new();
+        let generated_lex = Lexer::new(&l_file).into_lex().unwrap();
 
-        for spanned in l {
-            let (begin, token, end) = spanned.unwrap();
-            let line = format!("{}\t{}\n", &content[begin..end], token);
-            my_lex.push_str(&line);
-        }
-        // comparer la réponse
-
-        let good_file_content = std::fs::read(format!("tests/resources/{}.lex", filename)).unwrap();
-        let good_content = &String::from_utf8_lossy(&good_file_content);
-
-        assert_eq!(&good_content[..], &my_lex[..]);
+        assert_eq!(lex_file, generated_lex);
     }
 }
