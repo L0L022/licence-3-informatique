@@ -1,0 +1,3 @@
+[submodule "S6/compilation/l-compilator"]
+	path = S6/compilation/l-compilator
+	url = https://gitlab.com/louwaque/l-compilator.git
