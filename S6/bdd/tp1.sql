@@ -1,3 +1,5 @@
+SET SERVEROUTPUT ON
+
 ---------------------------------- question 1.1 -------------------------------------------------------------------------------
 DROP TABLE EnsembleContientAtribut PURGE;
 DROP TABLE EnsemblesAttributs PURGE;
@@ -41,7 +43,63 @@ BEGIN :Num1 := CreerEnsAttVide();
 END;
 /
 
-Execute AjouterAtt('A', 1);
+--Execute AjouterAtt('Z', 1);
+
+SELECT * FROM EnsemblesAttributs;
+SELECT * FROM EnsembleContientAtribut;
+
+CREATE OR REPLACE FUNCTION CreerEnsAtt(p_ChaineAtt VARCHAR) RETURN INTEGER IS
+NumEnsAtt INTEGER;
+posB INTEGER;
+posE INTEGER;
+BEGIN
+    NumEnsAtt := CreerEnsAttVide();
+    
+    IF p_chaineAtt IS NULL THEN
+        RETURN NumEnsAtt;
+    END IF;
+
+    posB := 1;
+    posE := 1;
+    LOOP
+        posE := INSTR(p_ChaineAtt, ',', posB);
+
+        IF posE = 0 THEN
+            EXIT;
+        END IF;
+        
+        AjouterAtt(SUBSTR(p_ChaineAtt, posB, posE - posB), NumEnsAtt);
+        
+        posB := posE + 1;
+    END LOOP;
+
+    AjouterAtt(SUBSTR(p_ChaineAtt, posB), NumEnsAtt);
+
+    RETURN NumEnsAtt;
+END;
+/
+
+--Variable Num2 INTEGER
+declare num2 INTEGER;
+BEGIN Num2 := CreerEnsAtt('A,V,C');
+END;
+/
+
+CREATE OR REPLACE FUNCTION EnsAtt2Chaine(p_NumEnsAtt INTEGER) RETURN VARCHAR IS
+atts VARCHAR;
+BEGIN
+
+    FOR att IN (SELECT NomAtt FROM EnsembleContientAtribut ORDER BY NomAtt) LOOP
+        IF atts IS NULL THEN
+            atts := att;
+        ELSE
+            atts := atts || ',' || att;
+        END IF;
+    END LOOP;
+
+    RETURN atts;
+END;
+/
 
 SELECT * FROM EnsemblesAttributs;
 SELECT * FROM EnsembleContientAtribut;
