@@ -32,7 +32,6 @@ FLAGS:
     -h, --help       Prints help information
     -l               Affiche les tokens de l'analyse lexicale
     -n               Affiche le code nasm (actif par defaut)
-    -s               Affiche l'arbre de derivation
     -t               Affiche la table des symboles
     -3               Affiche le code trois adresses
     -V, --version    Prints version information

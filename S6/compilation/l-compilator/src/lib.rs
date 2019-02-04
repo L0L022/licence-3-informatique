@@ -6,6 +6,7 @@ extern crate failure_derive;
 extern crate structopt;
 
 mod lexer;
+mod ast;
 use lexer::Lexer;
 
 use failure::{Error, ResultExt};
@@ -18,10 +19,6 @@ struct Opt {
     /// Affiche les tokens de l'analyse lexicale
     #[structopt(short = "l")]
     lex: bool,
-
-    /// Affiche l'arbre de derivation
-    #[structopt(short = "s")]
-    parse_tree: bool,
 
     /// Affiche l'arbre abstrait
     #[structopt(short = "a")]
