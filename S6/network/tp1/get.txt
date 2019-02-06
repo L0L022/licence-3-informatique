@@ -1,0 +1,2 @@
+GET /~emmanuel.godard/ens/appreseaux/01_decouverte HTTP/1.0
+

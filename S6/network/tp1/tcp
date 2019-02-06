@@ -1,0 +1,4 @@
+ 00:00:00.000000 IP 147.210.33.133.25 > 192.168.1.130.41585: Flags [P.], seq 1836834357:1836834442, ack 1133861711, win 724, options [nop,nop,TS val 1376423580 ecr 980594], length 85: SMTP: 220 startupcom-smtp-out-sp604003av.startup.com StartupCom Service relais mail ready
+ 00:00:00.160454 IP 192.168.1.130.41585 > 147.210.33.133.25: Flags [P.], seq 1:23, ack 85, win 46, options [nop,nop,TS val 980667 ecr 1376423580], length 22: SMTP: EHLO [192.168.1.130]
+ 00:00:00.070009 IP 147.210.33.133.25 > 192.168.1.130.41585: Flags [P.], seq 85:268, ack 23, win 724, options [nop,nop,TS val 1376423639 ecr 980667], length 183: SMTP: 250-startupcom-smtp-out-sp604003av.startup.com hello [147.210.33.133]      OK , pret pour envoyer un mail
+ 00:00:00.026680 IP 192.168.1.130.41585 > 147.210.33.133.25: Flags [P.], seq 23:77, ack 268, win 54, options [nop,nop,TS val 980691 ecr 1376423639], length 54: SMTP: MAIL FROM:<alice@startup.com>               SIZE=392
