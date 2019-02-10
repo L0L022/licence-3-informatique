@@ -125,8 +125,13 @@ def genererEpee(name, longueurlame, largeurlame, longueurmanche, taillepommeau, 
 # ***** Programme principal *****
 cleanAll()
 #genererEpee("Épée", 10, 0.5, 2, 0.2, 1, (0, 0, 0))
+#Épée 000 
 genererEpee("Épée", 1, 1, 6, 0.3, 1.4, (10, 0, 0))
+#Épée 001
 genererEpee("Épée", 7, 0.5, 2, 0.2, 2.5, (20, 0, 0))
+#Épée 002
 genererEpee("Épée", 7, 0.3, 2, 0.2, 0.8, (30, 0, 0))
+#Épée 003
 genererEpee("Épée", 2, 0.3, 1, 0.2, 0.8, (40, 0, 0))
+#Épée 004
 genererEpee("Épée", 10, 3, 2, 0.4, 3.5, (50, 0, 0))
