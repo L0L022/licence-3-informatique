@@ -145,7 +145,32 @@ BEGIN
 END;
 /
 
+DECLARE
+    res INTEGER;
+BEGIN
+    res := CreerEnsDF('A->B;B->C');
+    DBMS_OUTPUT.PUT_LINE(res);
+END;
+/
+
+DECLARE
+    EnsDF VARCHAR(100);
+BEGIN
+    EnsDF := EnsDF2Chaine(CreerEnsDF('A->B;B->C;C->D;D->F'));
+    DBMS_OUTPUT.PUT_LINE(EnsDF);
+END;
+/
+
+DECLARE
+    res VARCHAR(100);
+BEGIN
+    res := EnsAtt2Chaine(EnsDF2EnsAtt(CreerEnsDF('A->B;B->C;C->D;D->F;F->G;G->H;H->I')));
+    DBMS_OUTPUT.PUT_LINE(res);
+END;
+/
+
 SELECT * FROM EnsemblesAttributs;
 SELECT * FROM EnsembleContientAtribut;
 SELECT * FROM DFs;
-SELECT NumEnsAtt.currval FROM dual;
+SELECT * FROM EnsemblesDFs;
+SELECT * FROM EnsembleContientDF;

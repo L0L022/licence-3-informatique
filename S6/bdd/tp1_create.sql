@@ -309,3 +309,26 @@ BEGIN
     RETURN chaine;
 END;
 /
+
+CREATE OR REPLACE FUNCTION EnsDF2EnsAtt(p_NumEnsDF INTEGER) RETURN INTEGER IS
+NumEnsAtt INTEGER;
+BEGIN
+    NumEnsAtt := CreerEnsAttVide();
+    
+    FOR row IN (SELECT DISTINCT NomAtt
+                FROM EnsembleContientAtribut ECS
+                INNER JOIN DFs D ON ECS.NumEnsAtt = D.NumEnsGauche OR ECS.NumEnsAtt = D.NumEnsDroit
+                INNER JOIN EnsembleContientDF ECDF ON D.NumDF = ECDF.NumDF)
+    LOOP
+        AjouterAtt(row.NomAtt, NumEnsAtt);
+    END LOOP;
+    
+    RETURN NumEnsAtt;
+END;
+/
+
+CREATE OR REPLACE FUNCTION CopieEnsDF(p_NumEnsDF INTEGER) RETURN INTEGER IS
+BEGIN
+; -- PLUS TARD
+END;
+/
