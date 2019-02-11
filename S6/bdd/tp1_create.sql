@@ -1,16 +1,4 @@
-SET SERVEROUTPUT ON
-
 ---------------------------------- question 1.1 -------------------------------------------------------------------------------
-DROP TABLE EnsembleContientAtribut PURGE;
-DROP TABLE EnsemblesAttributs PURGE;
-
-drop sequence NumEnsAtt;
-
-DROP TABLE DFs PURGE;
-
-drop sequence NumDF;
-
-DROP TABLE EnsembleDFs PURGE;
 
 CREATE TABLE EnsemblesAttributs (
     NumEnsAtt INTEGER NOT NULL PRIMARY KEY
@@ -37,22 +25,11 @@ END;
 /
 
 CREATE OR REPLACE PROCEDURE AjouterAtt(p_NomAtt VARCHAR, p_NumEnsAtt NUMBER)
-      IS
-      BEGIN
-          INSERT INTO EnsembleContientAtribut VALUES(p_NumEnsAtt, p_NomAtt);
-      END AjouterAtt;
+IS
+BEGIN
+  INSERT INTO EnsembleContientAtribut VALUES(p_NumEnsAtt, p_NomAtt);
+END AjouterAtt;
 /
-
-Variable Num1 INTEGER
-
-BEGIN :Num1 := CreerEnsAttVide();
-END;
-/
-
---Execute AjouterAtt('Z', 1);
-
-SELECT * FROM EnsemblesAttributs;
-SELECT * FROM EnsembleContientAtribut;
 
 CREATE OR REPLACE FUNCTION CreerEnsAtt(p_ChaineAtt VARCHAR) RETURN INTEGER IS
 NumEnsAtt INTEGER;
@@ -85,12 +62,6 @@ BEGIN
 END;
 /
 
---Variable Num2 INTEGER
-declare num2 INTEGER;
-BEGIN Num2 := CreerEnsAtt('A,V,C');
-END;
-/
-
 CREATE OR REPLACE FUNCTION EnsAtt2Chaine(p_NumEnsAtt INTEGER) RETURN VARCHAR IS
 atts VARCHAR(100);
 BEGIN
@@ -107,11 +78,6 @@ BEGIN
 END;
 /
 
-declare atts VARCHAR(100);
-BEGIN atts := EnsAtt2Chaine(37); DBMS_OUTPUT.PUT_LINE(atts);
-END;
-/
-
 ---------------------------------- question 1.3 -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION EstElement(p_NomAtt VARCHAR, p_NumEnsAtt INTEGER) RETURN INTEGER IS
@@ -121,11 +87,6 @@ BEGIN
     ELSE
         RETURN 1;
     END IF;
-END;
-/
-
-declare num3 INTEGER;
-BEGIN Num3 := EstElement('D', 37); DBMS_OUTPUT.PUT_LINE(Num3);
 END;
 /
 
@@ -139,16 +100,6 @@ BEGIN
     RETURN 1;
 END;
 /
-declare res INTEGER;
- num5 INTEGER;
- num6 INTEGER;
-
-BEGIN 
-    num5 := CreerEnsAtt('A,B,C');
-    num6 := CreerEnsAtt('A,B,C,D,E');
-    res := EstInclus(num5,num6 ); DBMS_OUTPUT.PUT_LINE(res);
-END;
-/
 
 CREATE OR REPLACE FUNCTION EstEgal(p_NumEnsAtt_1 INTEGER, p_NumEnsAtt_2 INTEGER) RETURN INTEGER IS
 BEGIN
@@ -157,17 +108,6 @@ BEGIN
     ELSE
         RETURN 0;
     END IF;
-END;
-/
-
-declare res INTEGER;
- num5 INTEGER;
- num6 INTEGER;
-
-BEGIN 
-    num5 := CreerEnsAtt('A,B,C');
-    num6 := CreerEnsAtt('B,A,C');
-    res := EstEgal(num5,num6 ); DBMS_OUTPUT.PUT_LINE(res);
 END;
 /
 
@@ -181,19 +121,6 @@ BEGIN
     END LOOP;
     
     RETURN NumEnsAtt;
-END;
-/
-
-declare res INTEGER;
- num5 INTEGER;
- num6 INTEGER;
- num7 INTEGER;
-
-BEGIN 
-    num5 := CreerEnsAtt('A,B,C,F');
-    num6 := CreerEnsAtt('A,B,C,D,E');
-    num7 := CreerEnsAtt('A,B,C,D,E,F');
-    res := EstEgal(num7,UnionAtt(num5,num6 )); DBMS_OUTPUT.PUT_LINE(res);
 END;
 /
 
@@ -213,19 +140,6 @@ BEGIN
 END;
 /
 
-declare res INTEGER;
- num5 INTEGER;
- num6 INTEGER;
- num7 INTEGER;
-
-BEGIN 
-    num5 := CreerEnsAtt('A,B,C,F');
-    num6 := CreerEnsAtt('A,B,C,D,E');
-    num7 := CreerEnsAtt('A,B,C');
-    res := EstEgal(num7,IntersectionAtt(num5,num6 )); DBMS_OUTPUT.PUT_LINE(res);
-END;
-/
-
 CREATE OR REPLACE FUNCTION SoustractionAtt(p_NumEnsAtt_1 INTEGER, p_NumEnsAtt_2 INTEGER) RETURN INTEGER IS
 NumEnsAtt INTEGER;
 BEGIN
@@ -239,19 +153,6 @@ BEGIN
     END LOOP;
     
     RETURN NumEnsAtt;
-END;
-/
-
-declare res INTEGER;
- num5 INTEGER;
- num6 INTEGER;
- num7 INTEGER;
-
-BEGIN 
-    num5 := CreerEnsAtt('A,B,C,F');
-    num6 := CreerEnsAtt('A,B,C,D,E');
-    num7 := CreerEnsAtt('F');
-    res := EstEgal(num7,SoustractionAtt(num5,num6 )); DBMS_OUTPUT.PUT_LINE(res);
 END;
 /
 
@@ -269,21 +170,8 @@ BEGIN
 END;
 /
 
-declare res INTEGER;
- num5 INTEGER;
- num6 INTEGER;
- num7 INTEGER;
-
-BEGIN 
-    num5 := CreerEnsAtt('A,B,C,F');
-    res := EstEgal(num5,CopieAtt(num5)); DBMS_OUTPUT.PUT_LINE(res);
-END;
-/
-
 ---------------------------------------- II Gestion des dépendances fonctionelles ---------------------------------------------
 -------------------- question 1 -----------------------------------------------------------------------------------------------
-
-
 
 CREATE TABLE DFs (
     NumDF INTEGER PRIMARY KEY,
@@ -319,16 +207,6 @@ BEGIN
 END;
 /
 
-declare res INTEGER;
- num5 INTEGER;
- num6 INTEGER;
- num7 INTEGER;
-
-BEGIN 
-    res := CreerDF('A,B,C->E,D');
-END;
-/
-
 CREATE OR REPLACE FUNCTION DF2Chaine(p_NumDF INTEGER) RETURN VARCHAR IS
 BEGIN    
     FOR row IN (SELECT * FROM DFs WHERE NumDF = p_NumDF) LOOP
@@ -337,29 +215,11 @@ BEGIN
 END;
 /
 
-DECLARE
-    df VARCHAR(100);
-BEGIN
-    df := DF2Chaine(CreerDF('A,B,C->E,D'));
-    DBMS_OUTPUT.PUT_LINE(df);
-END;
-/
-
 CREATE OR REPLACE FUNCTION EstTriviale(p_NumDF INTEGER) RETURN INTEGER IS
 BEGIN
     FOR row IN (SELECT * FROM DFs WHERE NumDF = p_NumDF) LOOP
         RETURN EstInclus(row.NumEnsDroit, row.NumEnsGauche);
     END LOOP;
-END;
-/
-
-DECLARE
-    res INTEGER;
-BEGIN
-    res := EstTriviale(CreerDF('A,B,C->E,D'));
-    DBMS_OUTPUT.PUT_LINE(res);
-    res := EstTriviale(CreerDF('A,E,D->E,D'));
-    DBMS_OUTPUT.PUT_LINE(res);
 END;
 /
 
@@ -377,26 +237,75 @@ BEGIN
 END;
 /
 
-DECLARE
-    res INTEGER;
+CREATE TABLE EnsemblesDFs (
+    NumEnsDF INTEGER PRIMARY KEY
+);
+
+CREATE TABLE EnsembleContientDF (
+    NumEnsDF INTEGER REFERENCES EnsemblesDFs(NumEnsDF),
+    NumDF INTEGER REFERENCES DFs(NumDF),
+    PRIMARY KEY (NumEnsDF, NumDF)
+);
+
+create sequence NumEnsDF;
+
+CREATE OR REPLACE FUNCTION CreerEnsDFVide RETURN INTEGER IS
+var INTEGER;
 BEGIN
-    res := EstPlusForte(CreerDF('A,B->E,D'), CreerDF('A,B,C->E,D,F'));
-    DBMS_OUTPUT.PUT_LINE(res); -- 1
-    res := EstPlusForte(CreerDF('A,B->E,D'), CreerDF('C->F'));
-    DBMS_OUTPUT.PUT_LINE(res); -- 0
+    INSERT INTO EnsemblesDFs VALUES(NumEnsDF.NextVal) RETURNING NumEnsDF INTO var;
+    RETURN var;
 END;
 /
 
+CREATE OR REPLACE PROCEDURE AjouterDF(p_NumDF INTEGER, p_NumEnsDF INTEGER) IS
+BEGIN
+    INSERT INTO EnsembleContientDF VALUES(p_NumEnsDF, p_NumDF);
+END;
+/
 
+CREATE OR REPLACE FUNCTION CreerEnsDF(p_ChaineDF VARCHAR) RETURN INTEGER IS
+NumEnsDF INTEGER;
+posB INTEGER;
+posE INTEGER;
+BEGIN
+    NumEnsDF := CreerEnsDFVide();
+    
+    IF p_ChaineDF IS NULL THEN
+        RETURN NumEnsDF;
+    END IF;
 
-CREATE TABLE EnsembleDFs (
-    NumDF INTEGER PRIMARY KEY,
-    NumEnsGauche INTEGER NOT NULL REFERENCES EnsemblesAttributs(NumEnsAtt),
-    NumEnsDroit INTEGER NOT NULL REFERENCES EnsemblesAttributs(NumEnsAtt),
-    UNIQUE (NumEnsGauche, NumEnsDroit)
-);
+    posB := 1;
+    posE := 1;
+    LOOP
+        posE := INSTR(p_ChaineDF, ';', posB);
 
-SELECT * FROM EnsemblesAttributs;
-SELECT * FROM EnsembleContientAtribut;
-SELECT * FROM DFs;
-SELECT NumEnsAtt.currval FROM dual;
+        IF posE = 0 THEN
+            EXIT;
+        END IF;
+        
+        AjouterDF(CreerDF(SUBSTR(p_ChaineDF, posB, posE - posB)), NumEnsDF);
+        
+        posB := posE + 1;
+    END LOOP;
+
+    AjouterDF(CreerDF(SUBSTR(p_ChaineDF, posB)), NumEnsDF);
+
+    RETURN NumEnsDF;
+END;
+/
+
+CREATE OR REPLACE FUNCTION EnsDF2Chaine(p_NumEnsDF INTEGER) RETURN VARCHAR IS
+chaine VARCHAR(100);
+BEGIN
+
+    FOR row IN (SELECT NumDF FROM EnsembleContientDF WHERE NumEnsDF = p_NumEnsDF ORDER BY NumDF) LOOP
+        IF chaine IS NULL THEN
+            chaine := DF2Chaine(row.NumDF);
+        ELSE
+            chaine := chaine || ';' || DF2Chaine(row.NumDF);
+        END IF;
+    END LOOP;
+
+    RETURN chaine;
+END;
+/
