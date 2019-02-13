@@ -1,0 +1,7 @@
+[package]
+name = "echo-client"
+version = "0.1.0"
+authors = ["Loïc Escales <loic.escales@kakos.fr>"]
+edition = "2018"
+
+[dependencies]
