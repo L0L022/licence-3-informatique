@@ -169,6 +169,14 @@ BEGIN
 END;
 /
 
+DECLARE
+    res INTEGER;
+BEGIN
+    res := CreerEnsDF('A->B;B->C');
+    DBMS_OUTPUT.PUT_LINE(res);
+END;
+/
+
 SELECT * FROM EnsemblesAttributs;
 SELECT * FROM EnsembleContientAtribut;
 SELECT * FROM DFs;

@@ -1,19 +1,4 @@
----------------------------------- question 1.1 -------------------------------------------------------------------------------
-
-CREATE TABLE EnsemblesAttributs (
-    NumEnsAtt INTEGER NOT NULL PRIMARY KEY
-);
-
-CREATE TABLE EnsembleContientAtribut(
-    NumEnsAtt INTEGER NOT NULL,
-    NomAtt VARCHAR(30) NOT NULL,
-    CONSTRAINT PK_EnsAtt PRIMARY KEY (NumEnsAtt, NomAtt),
-    CONSTRAINT FK_EnsAtt_NumEnsAtt FOREIGN KEY(NumEnsAtt) REFERENCES EnsemblesAttributs(NumEnsAtt) ON DELETE CASCADE
-);
-
-create sequence NumEnsAtt;
-
----------------------------------- question 1.2 -------------------------------------------------------------------------------
+----------------------------- question 1.2 -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION CreerEnsAttVide
 RETURN INTEGER IS
@@ -171,17 +156,6 @@ END;
 /
 
 ---------------------------------------- II Gestion des dépendances fonctionelles ---------------------------------------------
--------------------- question 1 -----------------------------------------------------------------------------------------------
-
-CREATE TABLE DFs (
-    NumDF INTEGER PRIMARY KEY,
-    NumEnsGauche INTEGER NOT NULL REFERENCES EnsemblesAttributs(NumEnsAtt),
-    NumEnsDroit INTEGER NOT NULL REFERENCES EnsemblesAttributs(NumEnsAtt),
-    UNIQUE (NumEnsGauche, NumEnsDroit)
-);
-
-
-create sequence NumDF;
 
 -------------------- question 1 -----------------------------------------------------------------------------------------------
 -- dec dans les fonctions
@@ -236,18 +210,6 @@ BEGIN
     END LOOP;
 END;
 /
-
-CREATE TABLE EnsemblesDFs (
-    NumEnsDF INTEGER PRIMARY KEY
-);
-
-CREATE TABLE EnsembleContientDF (
-    NumEnsDF INTEGER REFERENCES EnsemblesDFs(NumEnsDF),
-    NumDF INTEGER REFERENCES DFs(NumDF),
-    PRIMARY KEY (NumEnsDF, NumDF)
-);
-
-create sequence NumEnsDF;
 
 CREATE OR REPLACE FUNCTION CreerEnsDFVide RETURN INTEGER IS
 var INTEGER;
@@ -329,6 +291,24 @@ END;
 
 CREATE OR REPLACE FUNCTION CopieEnsDF(p_NumEnsDF INTEGER) RETURN INTEGER IS
 BEGIN
-; -- PLUS TARD
+    RETURN CreerEnsDF(EnsDF2Chaine(p_NumEnsDF));
+END;
+/
+
+CREATE OR REPLACE FUNCTION CreerSchema(p_ChaineEnsAtt VARCHAR, p_ChaineEnsDF VARCHAR) RETURN INTEGER IS
+var INTEGER;
+BEGIN
+    INSERT INTO Schemas VALUES(NumSchema.NextVal, UnionAtt(CreerEnsAtt(p_ChaineEnsAtt), EnsDF2EnsAtt(p_ChaineEnsDF)), CreerEnsDF(p_ChaineEnsDF)) RETURNING NumSchema INTO var;
+    RETURN var;
+END;
+/
+
+CREATE OR REPLACE FUNCTION Schema2Chaine(p_NumSchema INTEGER) RETURN new_type IS
+TYPE new_type is record(RES pls_integer, RESERVED_SEAT_NO pls_integer);
+BEGIN
+    FOR row IN (SELECT EnsAtt2Chaine(NumEnsAtt), EnsDF2Chaine(NumEnsDF) FROM Schemas WHERE NumSchema = p_NumSchema)
+    LOOP
+        RETURN '';
+    END LOOP;
 END;
 /
