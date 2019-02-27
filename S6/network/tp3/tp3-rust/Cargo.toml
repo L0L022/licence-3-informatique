@@ -1,0 +1,10 @@
+[package]
+name = "tp2-rust"
+version = "0.1.0"
+authors = ["Loïc Escales <loic.escales@kakos.fr>"]
+edition = "2018"
+
+[dependencies]
+structopt = "0.2.14"
+failure = "0.1.5"
+exitfailure = "0.5.1"
