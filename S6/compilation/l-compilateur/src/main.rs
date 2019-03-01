@@ -107,6 +107,15 @@ main()
 	let t = t3;
 	let lexer = lexer::Lexer::new(t);
 	use lalrpop_util::ParseError::*;
+
+	println!("{:#?}", lexical::lexical::ProgramParser::new().parse(lexer));
+}
+
+fn parse() {
+	let t = "";
+	let lexer = lexer::Lexer::new(t);
+	use lalrpop_util::ParseError::*;
+
 	match lexical::lexical::ProgramParser::new().parse(lexer) {
 		Ok(v) => println!("{:#?}", v),
 		Err(e) => match e {

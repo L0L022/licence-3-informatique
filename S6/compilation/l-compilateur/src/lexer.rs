@@ -170,6 +170,7 @@ impl<'input> Iterator for Lexer<'input> {
 			use LogosToken::*;
 
 			let t = self.lexer.token;
+			print!("{:?}, ", t);
 
 			return match t {
 				End => None,
