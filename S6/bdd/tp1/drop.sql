@@ -1,3 +1,11 @@
+drop sequence NumStructure;
+DROP TABLE StructureContientSchema PURGE;
+DROP TABLE Structures PURGE;
+
+drop sequence NumEnsClef;
+DROP TABLE EnsembleContientClef PURGE;
+DROP TABLE EnsemblesClefs PURGE;
+
 drop sequence NumSchema;
 DROP TABLE Schemas;
 

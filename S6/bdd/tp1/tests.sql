@@ -1,9 +1,5 @@
 SET SERVEROUTPUT ON
 
----------------------------------- question 1.1 -------------------------------------------------------------------------------
-
----------------------------------- question 1.2 -------------------------------------------------------------------------------
-
 Variable Num1 INTEGER
 
 BEGIN :Num1 := CreerEnsAttVide();
@@ -15,7 +11,6 @@ END;
 SELECT * FROM EnsemblesAttributs;
 SELECT * FROM EnsembleContientAtribut;
 
---Variable Num2 INTEGER
 declare num2 INTEGER;
 BEGIN Num2 := CreerEnsAtt('A,V,C');
 END;
@@ -25,8 +20,6 @@ declare atts VARCHAR(100);
 BEGIN atts := EnsAtt2Chaine(37); DBMS_OUTPUT.PUT_LINE(atts);
 END;
 /
-
----------------------------------- question 1.3 -------------------------------------------------------------------------------
 
 declare res INTEGER;
  num5 INTEGER;
@@ -100,13 +93,6 @@ BEGIN
 END;
 /
 
----------------------------------------- II Gestion des dépendances fonctionelles ---------------------------------------------
--------------------- question 1 -----------------------------------------------------------------------------------------------
-
--------------------- question 1 -----------------------------------------------------------------------------------------------
--- dec dans les fonctions
---Type DF_t is record (NumEnsGauche integer, NumEnsDroit integer);
-
 declare res INTEGER;
  num5 INTEGER;
  num6 INTEGER;
@@ -173,6 +159,16 @@ DECLARE
     res INTEGER;
 BEGIN
     res := CreerEnsDF('A->B;B->C');
+    DBMS_OUTPUT.PUT_LINE(res);
+END;
+/
+
+DECLARE
+    res INTEGER;
+BEGIN
+    res := CreerSchema('A,B,C,D', 'A->B;B->C');
+    DBMS_OUTPUT.PUT_LINE(res);
+    res := CreerSchema('D', 'A->B;B->C');
     DBMS_OUTPUT.PUT_LINE(res);
 END;
 /

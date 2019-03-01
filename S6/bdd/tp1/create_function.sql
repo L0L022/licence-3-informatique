@@ -1,5 +1,3 @@
------------------------------ question 1.2 -------------------------------------------------------------------------------
-
 CREATE OR REPLACE FUNCTION CreerEnsAttVide
 RETURN INTEGER IS
 var INTEGER;
@@ -62,8 +60,6 @@ BEGIN
     RETURN atts;
 END;
 /
-
----------------------------------- question 1.3 -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION EstElement(p_NomAtt VARCHAR, p_NumEnsAtt INTEGER) RETURN INTEGER IS
 BEGIN
@@ -154,12 +150,6 @@ BEGIN
     RETURN NumEnsAtt;
 END;
 /
-
----------------------------------------- II Gestion des dépendances fonctionelles ---------------------------------------------
-
--------------------- question 1 -----------------------------------------------------------------------------------------------
--- dec dans les fonctions
---Type DF_t is record (NumEnsGauche integer, NumEnsDroit integer);
 
 CREATE OR REPLACE FUNCTION CreerDF(p_ChaineAtt VARCHAR) RETURN INTEGER IS
 pos INTEGER;
@@ -298,17 +288,53 @@ END;
 CREATE OR REPLACE FUNCTION CreerSchema(p_ChaineEnsAtt VARCHAR, p_ChaineEnsDF VARCHAR) RETURN INTEGER IS
 var INTEGER;
 BEGIN
-    INSERT INTO Schemas VALUES(NumSchema.NextVal, UnionAtt(CreerEnsAtt(p_ChaineEnsAtt), EnsDF2EnsAtt(p_ChaineEnsDF)), CreerEnsDF(p_ChaineEnsDF)) RETURNING NumSchema INTO var;
+    var := CreerEnsDF(p_ChaineEnsDF);
+    INSERT INTO Schemas VALUES(NumSchema.NextVal, UnionAtt(CreerEnsAtt(p_ChaineEnsAtt), EnsDF2EnsAtt(var)), var) RETURNING NumSchema INTO var;
     RETURN var;
 END;
 /
 
-CREATE OR REPLACE FUNCTION Schema2Chaine(p_NumSchema INTEGER) RETURN new_type IS
-TYPE new_type is record(RES pls_integer, RESERVED_SEAT_NO pls_integer);
+-- SELECT EnsAtt2Chaine(NumEnsAtt), EnsDF2Chaine(NumEnsDF) FROM Schemas WHERE NumSchema = &p_NumSchema;
+
+CREATE OR REPLACE FUNCTION EnsClef2Chaine(p_NumEnsClef INTEGER) RETURN VARCHAR IS
+chaine VARCHAR(100);
 BEGIN
-    FOR row IN (SELECT EnsAtt2Chaine(NumEnsAtt), EnsDF2Chaine(NumEnsDF) FROM Schemas WHERE NumSchema = p_NumSchema)
-    LOOP
-        RETURN '';
+    FOR row IN (SELECT NumClef FROM EnsembleContientClef WHERE NumEnsClef = p_NumEnsClef ORDER BY NumEnsClef) LOOP
+        IF chaine IS NULL THEN
+            chaine := '{' || row.NumClef || '}';
+        ELSE
+            chaine := chaine || ',' || '{' || row.NumClef || '}';
+        END IF;
     END LOOP;
+
+    RETURN chaine;
+END;
+/
+
+CREATE OR REPLACE FUNCTION CreerEnsClefVide(p_NumSchema INTEGER) RETURN INTEGER IS
+var INTEGER;
+BEGIN
+    INSERT INTO EnsemblesClefs VALUES(NumEnsClef.NextVal, p_NumSchema) RETURNING NumEnsClef INTO var;
+    RETURN var;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE AjouterClef(p_NumClef INTEGER, p_NumEnsClef INTEGER) IS
+BEGIN
+    INSERT INTO EnsembleContientClef VALUES(p_NumEnsClef, p_NumClef);
+END;
+/
+
+CREATE OR REPLACE FUNCTION CreerStructureVide RETURN INTEGER IS
+var INTEGER;
+BEGIN
+    INSERT INTO Structures VALUES(NumStructure.NextVal) RETURNING NumStructures INTO var;
+    RETURN var;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE AjouterSchema(p_NumSchema INTEGER, p_NumStructure INTEGER) IS
+BEGIN
+    INSERT INTO StructureContientSchema VALUES(p_NumStructure, p_NumSchema);
 END;
 /

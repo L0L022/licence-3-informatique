@@ -41,3 +41,28 @@ CREATE TABLE Schemas (
 );
 
 create sequence NumSchema;
+
+CREATE TABLE EnsemblesClefs (
+    NumEnsClef INTEGER PRIMARY KEY,
+    NumSchema INTEGER REFERENCES Schemas(NumSchema) ON DELETE CASCADE,
+    UNIQUE (NumSchema)
+);
+
+CREATE TABLE EnsembleContientClef (
+    NumEnsClef INTEGER NOT NULL REFERENCES EnsemblesClefs(NumEnsClef) ON DELETE CASCADE,
+    NumClef INTEGER NOT NULL REFERENCES EnsemblesAttributs(NumEnsAtt),
+    PRIMARY KEY (NumEnsClef, NumClef)
+);
+
+create sequence NumEnsClef;
+
+CREATE TABLE Structures (
+    NumStructures INTEGER PRIMARY KEY
+);
+
+CREATE TABLE StructureContientSchema (
+    NumStructures INTEGER NOT NULL REFERENCES Structures(NumStructures) ON DELETE CASCADE,
+    NumSchema INTEGER NOT NULL REFERENCES Schemas(NumSchema)
+);
+
+create sequence NumStructure;
