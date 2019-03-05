@@ -75,6 +75,7 @@ fn tcp_client(mut stream: TcpStream) -> Result<(), Error> {
 
     while input_stream.read_line(&mut line)? > 0 {
         stream.write(line.as_ref())?;
+        stream.flush()?;
         line.clear();
     }
 
@@ -105,7 +106,11 @@ fn tcp_server(listener: TcpListener) -> Result<(), Error> {
 }
 
 fn udp_client(socket: UdpSocket, server: String) -> Result<(), Error> {
-    let server: Vec<SocketAddr> = server.to_socket_addrs()?.collect();
+    // See: https://github.com/rust-lang/rust/issues/34202
+    let server: Vec<SocketAddr> = server
+        .to_socket_addrs()?
+        .filter(|ip| ip.is_ipv4() == socket.local_addr().unwrap().is_ipv4())
+        .collect();
 
     println!("client ok");
 
@@ -144,10 +149,10 @@ fn udp_server(socket: UdpSocket) -> Result<(), Error> {
 #[derive(StructOpt, Debug)]
 #[structopt(author = "Loïc Escales <loic.escales@etu.univ-amu.fr>")]
 struct Opt {
-    /// tcp or udp
+    /// tcp ou udp
     protocol: Protocol,
 
-    /// 6 or 6only or 4
+    /// 6 ou 6only ou 4
     ip_stack: IpStack,
 
     #[structopt(flatten)]
