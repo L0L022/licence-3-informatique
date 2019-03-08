@@ -31,7 +31,7 @@ def newColor(col, name):
     mat.diffuse_color = col
 
 # pour donner une couleur à une face spécifique
-# ATTENTION blender doit être en mode OBJECT lors 
+# ATTENTION blender doit être en mode OBJECT lors
 # de l'appel pour que cette fonction marche
 def setColor(obj, idFace, color):
     if color not in obj.data.materials:
@@ -39,7 +39,7 @@ def setColor(obj, idFace, color):
     obj.data.polygons[idFace].material_index = obj.data.materials.find(color)
 
 # pour donner une couleur à tout un objet
-# ATTENTION blender doit être en mode OBJECT lors 
+# ATTENTION blender doit être en mode OBJECT lors
 # de l'appel pour que cette fonction marche
 def setColorAll(obj, color):
     if color not in obj.data.materials:
@@ -49,7 +49,7 @@ def setColorAll(obj, color):
         obj.data.polygons[p.index].material_index = indexMat
 
 # pour récupérer les faces sélectionnées
-# ATTENTION blender doit être en mode OBJECT lors 
+# ATTENTION blender doit être en mode OBJECT lors
 # de l'appel pour que cette fonction marche
 def getSelectedFacesID(obj):
     selfaces = []
@@ -58,145 +58,150 @@ def getSelectedFacesID(obj):
             selfaces.append(f.index)
     return selfaces
 
-
-
-
 # on fait les traitement en mode OBJECT
 editmode = False
 if bpy.context.active_object.mode == 'EDIT':
     editmode = True
     bpy.ops.object.mode_set(mode = 'OBJECT')
-    
+
 # quelques nouvelles couleurs
 newColor((1,1,1), "blanc")
 newColor((1,0,0), "rouge")
 newColor((1,1,0), "jaune")
 newColor((0,1,0), "vert")
 newColor((0,0,1), "bleu")
+newColor((1,0,1), "violet")
+newColor((0,1,1), "syan")
 
-depth_colors = ["rouge", "vert", "bleu"]
+depth_colors = ["rouge", "violet", "bleu", "syan", "vert", "jaune"]
 
 # on récupère notre objet
 monObj = bpy.context.scene.objects['Cube']
 
 setColorAll(monObj, "blanc")
 
-# on récupère la liste des faces sélectionnées, 
+# on récupère la liste des faces sélectionnées,
 # et on les set en rouge
 curSel = getSelectedFacesID(monObj)
-for s in curSel:
-    setColor(monObj, s, "rouge")
 
 # on construit la liste de tous les voisinages
 FA = buildFaceAdjacency(monObj)
 
+# Sélection de faces suivant une profondeur max du parcours en largeur
+def selectAdjFaces(selectedFace, depth_max):
+    already_colored = []
+    face_to_color = [selectedFace]
+    new_face = []
 
-# parcours ajd basique
-#already_colored = []
-#face_to_color = curSel.copy()
-#new_face = []
+    depth = 0
 
-#depth = 0
-#depth_max = 10
+    while depth < depth_max:
+       new_face.clear()
 
-#while depth < depth_max:
-#    new_face.clear()
-#    
-#    for v in face_to_color:
-#        if v in already_colored:
-#            continue
-#        already_colored.append(v)
-#        
-#        setColor(monObj, v, depth_colors[depth % len(depth_colors)])
-#        
-#        new_face.extend(FA[v])
-#    depth += 1
-#    face_to_color.clear()
-#    face_to_color.extend(new_face)
+       for v in face_to_color:
+           if v in already_colored:
+               continue
+           already_colored.append(v)
 
-# parcours ajd n faces
-#max_faces = 10
-#already_colored = []
-#face_to_color = curSel.copy()
-#new_face = []
+           setColor(monObj, v, depth_colors[depth % len(depth_colors)])
 
-#depth = 0
+           new_face.extend(FA[v])
 
-#while len(already_colored) < max_faces:
-#    new_face.clear()
-#    
-#    for v in face_to_color:
-#        if len(already_colored) >= max_faces:
-#            break
-#        
-#        if v in already_colored:
-#            continue
-#        already_colored.append(v)
-#        
-#        setColor(monObj, v, depth_colors[depth % len(depth_colors)])
-#        
-#        new_face.extend(FA[v])
-#    depth += 1
-#    face_to_color.clear()
-#    face_to_color.extend(new_face)
+       depth += 1
+       face_to_color.clear()
+       face_to_color.extend(new_face)
 
-# parcours ajd distance
-#already_colored = []
-#face_to_color = curSel.copy()
-#new_face = []
+# Méthode 1 : Sélection de N faces
+def selectNFaces(selectedFace, N):
+    max_faces = N
+    already_colored = []
+    face_to_color = [selectedFace]
+    new_face = []
 
-#depth = 0
-#distance = 0.5
-#selec_center = monObj.data.polygons[curSel[0]].center
+    depth = 0
 
-#while len(face_to_color) > 0:
-#    new_face.clear()
-#    
-#    for v in face_to_color:
-#        if (monObj.data.polygons[v].center - selec_center).length_squared > distance:
-#            break
-#        
-#        if v in already_colored:
-#            continue
-#        already_colored.append(v)
-#        
-#        setColor(monObj, v, depth_colors[depth % len(depth_colors)])
-#        
-#        new_face.extend(FA[v])
-#    depth += 1
-#    face_to_color.clear()
-#    face_to_color.extend(new_face)
+    while len(already_colored) < max_faces:
+       new_face.clear()
 
-# parcours ajd n faces
+       for v in face_to_color:
+           if len(already_colored) >= max_faces:
+               break
 
-already_colored = []
-face_to_color = curSel.copy()
-new_face = []
+           if v in already_colored:
+               continue
+           already_colored.append(v)
 
-depth = 0
-diff = radians(10.0)
+           setColor(monObj, v, depth_colors[depth % len(depth_colors)])
 
-while len(face_to_color) > 0:
-    new_face.clear()
-    
-    for v in face_to_color:
-        if v in already_colored:
-            continue
-        already_colored.append(v)
-        
-        setColor(monObj, v, depth_colors[depth % len(depth_colors)])
-        
-        n1 = monObj.data.polygons[v].normal
-        for f in FA[v]:
-            n2 = monObj.data.polygons[f].normal
-            if n1.angle(n2) > diff:
+           new_face.extend(FA[v])
+
+       depth += 1
+       face_to_color.clear()
+       face_to_color.extend(new_face)
+
+# Méthode 2 : Sélection par adjacence et par distance
+def selectDistance(selectedFace, maxDistance):
+    already_colored = []
+    face_to_color = [selectedFace]
+    new_face = []
+
+    depth = 0
+    selec_center = monObj.data.polygons[selectedFace].center
+
+    while len(face_to_color) > 0:
+       new_face.clear()
+
+       for v in face_to_color:
+           if (monObj.data.polygons[v].center - selec_center).length_squared > maxDistance:
+               break
+
+           if v in already_colored:
+               continue
+           already_colored.append(v)
+
+           setColor(monObj, v, depth_colors[depth % len(depth_colors)])
+
+           new_face.extend(FA[v])
+
+       depth += 1
+       face_to_color.clear()
+       face_to_color.extend(new_face)
+
+# Méthode 3 : Sélection par similarité de normales
+def selectSimilarNormal(selectedFace, maxDiffAngle):
+    already_colored = []
+    face_to_color = [selectedFace]
+    new_face = []
+
+    depth = 0
+    diff = radians(maxDiffAngle)
+
+    while len(face_to_color) > 0:
+        new_face.clear()
+
+        for v in face_to_color:
+            if v in already_colored:
                 continue
-            new_face.append(f)
-        
-    depth += 1
-    face_to_color.clear()
-    face_to_color.extend(new_face)
-    
+            already_colored.append(v)
+
+            setColor(monObj, v, depth_colors[depth % len(depth_colors)])
+
+            n1 = monObj.data.polygons[v].normal
+            for f in FA[v]:
+                n2 = monObj.data.polygons[f].normal
+                if n1.angle(n2) > diff:
+                    continue
+                new_face.append(f)
+
+        depth += 1
+        face_to_color.clear()
+        face_to_color.extend(new_face)
+
+for s in curSel:
+    selectAdjFaces(s)
+    # selectNFaces(s, 10)
+    # selectDistance(s, 0.1)
+    # selectSimilarNormal(s, 15)
 
 # on repasse dans le mode d'origine
 if editmode:
