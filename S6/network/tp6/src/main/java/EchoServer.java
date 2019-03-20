@@ -9,6 +9,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.io.*;
 
@@ -41,6 +43,13 @@ class EchoServer {
 		
 		while (true) {
 			selector.select();
+			/*
+			Set<SelectionKey> crunchifyKeys = selector.selectedKeys();
+			Iterator<SelectionKey> crunchifyIterator = crunchifyKeys.iterator();
+ 
+			while (crunchifyIterator.hasNext()) {
+				SelectionKey sk = crunchifyIterator.next();
+			*/
 			for (SelectionKey sk : selector.selectedKeys()) {
 				if (sk.isAcceptable()) {
 					Data d = new Data();
@@ -52,22 +61,25 @@ class EchoServer {
 					Socket s = sc.socket();
 					
 					sc.write(ByteBuffer.wrap(("Bonjour " + s.getInetAddress() + "! (vous utilisez le port " + s.getPort() + ")").getBytes()));
-					sc.read(d.buffer);
 				}
 				
 				if (sk.isReadable()) {
 					Data d = (Data)sk.attachment();
-					//System.out.println(d.buffer);
+					SocketChannel sc = (SocketChannel)sk.channel();
+					Socket s = sc.socket();
+					sc.read(d.buffer);
 					d.buffer.flip();
 					//System.out.println(d.buffer);
 					while (d.buffer.hasRemaining()) {
-						byte c = d.buffer.get();
-						System.out.println("get: "+c);
+						byte c_ = d.buffer.get();
+						char c = (char)c_;
+						//System.out.println("get: "+c);
 						if (c == '\n') {
 							d.compteur++;
+							d.line += '\n';
 				            /* log */
-							Socket s = ((SocketChannel)sk.channel()).socket();
-				            System.err.println("[" + s.getInetAddress() + ":" + s.getPort() + "]: " + d.compteur + ":" + d.line);
+
+				            System.err.print("[" + s.getInetAddress() + ":" + s.getPort() + "]: " + d.compteur + ":" + d.line);
 				            
 				            /* echo vers le client */
 				            ((SocketChannel)sk.channel()).write(ByteBuffer.wrap(("> " + d.line).getBytes()));
@@ -75,7 +87,7 @@ class EchoServer {
 				            d.line = "";
 							
 						} else {
-							d.line = d.line + c;
+							d.line += c;
 						}
 					}
 					d.buffer.clear();
