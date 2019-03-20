@@ -1,3 +1,6 @@
 [submodule "S6/compilation/l-compilator"]
 	path = S6/compilation/l-compilator
 	url = https://gitlab.com/louwaque/l-compilator.git
+[submodule "S6/network/l-clavardator"]
+	path = S6/network/l-clavardator
+	url = https://gitlab.com/louwaque/l-clavardator.git
